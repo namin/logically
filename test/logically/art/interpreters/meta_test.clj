@@ -68,3 +68,20 @@
              (ex-cf-solver-family ['grandparent gp 'emily] c)
              (== q [gp c])))
         '((adam 0.05) (allan 0.025) (aziz 0.025)))))
+
+(deftest test-ex-cft-solver-family
+  (is (= (run* [q]
+           (fresh [gp c]
+             (ex-cft-solver-family ['grandparent gp 'diana] c 0)
+             (== q [gp c])))
+        '((adam 0.5) (allan 0.25) (aziz 0.25))))
+  (is (= (run* [q]
+           (fresh [gp c]
+             (ex-cft-solver-family ['grandparent gp 'emily] c 0)
+             (== q [gp c])))
+        '((adam 0.05) (allan 0.025) (aziz 0.025))))
+  (is (= (run* [q]
+           (fresh [d c]
+             (ex-cft-solver-family ['ancestor 'sam d] c 0.4)
+             (== q [d c])))
+        '((adam 0.7) (allan 0.8) (chris 0.35) (diana 0.35)))))

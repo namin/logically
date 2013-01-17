@@ -127,9 +127,19 @@
     [(== [a b c] '((parent aziz chris) () 0.25))]
     [(== [a b c] '((parent chris diana) () 1))]
     [(== [a b c] '((parent chris emily) () 0.1))]
+    [(== [a b c] '((ancestor sam adam) () 0.7))]
+    [(== [a b c] '((ancestor sam allan) () 0.8))]
     [(fresh [parent child grandparent]
        (== a ['grandparent grandparent child])
        (== b [['parent parent child] ['parent grandparent parent]])
+       (== c 1))]
+    [(fresh [parent child]
+       (== a ['ancestor parent child])
+       (== b ['parent parent child])
+       (== c 1))]
+    [(fresh [ancestor parent child]
+       (== a ['ancestor ancestor child])
+       (== b [['parent parent child] ['ancestor ancestor parent]])
        (== c 1))]))
 
 (defn make-clause-from-clause-cf [clause-cf]
@@ -141,3 +151,24 @@
 
 (def ex-cf-solver-family (solve-cf-for solver-family-clause-cf * *))
 
+;; Program 17.10 Reasoning with uncertainty with threshold cutoff
+(defn solve-cft-for [clause-cf chain-cf conj-cf chain-t]
+  (letfn [(solve [goal certainty t]
+            (conde
+              [(== goal ())
+               (== certainty 1)]
+              [(fresh [g gs c1 c2]
+                 (conso g gs goal)
+                 (solve g c1 t)
+                 (solve gs c2 t)
+                 (project [c1 c2] (== certainty (conj-cf c1 c2))))]
+              [(fresh [b c1 c2 t1]
+                 (clause-cf goal b c1)
+                 (project [t c1]
+                   (== (> c1 t) true)
+                   (== t1 (chain-t t c1)))
+                 (solve b c2 t1)
+                 (project [c1 c2] (== certainty (chain-cf c1 c2))))]))]
+    solve))
+
+(def ex-cft-solver-family (solve-cft-for solver-family-clause-cf * * /))
