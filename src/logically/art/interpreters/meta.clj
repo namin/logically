@@ -19,18 +19,16 @@
                  (solve b))]))]
     solve))
 
-(defn solver-member [solve-for]
-  (letfn [(clause [a b]
-            (conde
-              [(fresh [x xs]
-                 (== a ['member x (lcons x xs)])
-                 (== b ()))]
-              [(fresh [x y ys]
-                 (== a ['member x (lcons y ys)])
-                 (== b ['member x ys]))]))]
-    (solve-for clause)))
+(defn solver-member-clause [a b]
+  (conde
+    [(fresh [x xs]
+       (== a ['member x (lcons x xs)])
+       (== b ()))]
+    [(fresh [x y ys]
+       (== a ['member x (lcons y ys)])
+       (== b ['member x ys]))]))
 
-(def ex-solver-member (solver-member solve-for))
+(def ex-solver-member (solve-for solver-member-clause))
 
 ;; Program 17.6 A meta-interpreter for pure Prolog in continutation style
 (defn alt-solve-for [clause]
@@ -53,7 +51,7 @@
                  (solve b gs2))]))]
     solve0))
 
-(def ex-alt-solver-member (solver-member alt-solve-for))
+(def ex-alt-solver-member (alt-solve-for solver-member-clause))
 
 ;; Program 17.7 A tracer for Prolog
 (defn solve-trace-for [clause]
@@ -76,7 +74,7 @@
                a))]
     solve0))
 
-(def ex-trace-solver-member (solver-member solve-trace-for))
+(def ex-trace-solver-member (solve-trace-for solver-member-clause))
 
 ;; Program 17.8 A meta-interpreter for building a proof tree
 (defn solve-proof-for [clause]
@@ -95,5 +93,51 @@
                  (solve b t))]))]
     solve))
 
-(def ex-proof-solver-member (solver-member solve-proof-for))
+(def ex-proof-solver-member (solve-proof-for solver-member-clause))
+
+;; Program 17.9 A meta-interpreter for reasoning about uncertainty
+(defn solve-cf-for [clause-cf chain-cf conj-cf]
+  (letfn [(solve [goal certainty]
+            (conde
+              [(== goal ())
+               (== certainty 1)]
+              [(fresh [g gs c1 c2]
+                 (conso g gs goal)
+                 (solve g c1)
+                 (solve gs c2)
+                 (project [c1 c2] (== certainty (conj-cf c1 c2))))]
+              [(fresh [b c1 c2]
+                 (clause-cf goal b c1)
+                 (solve b c2)
+                 (project [c1 c2] (== certainty (chain-cf c1 c2))))]))]
+    solve))
+
+(defn make-clause-cf [clause]
+  (fn [a b c]
+    (all
+      (== c 1)
+      (clause a b))))
+
+(def ex-cf-solver-member (solve-cf-for (make-clause-cf solver-member-clause) * min))
+
+(defn solver-family-clause-cf [a b c]
+  (conde
+    [(== [a b c] '((parent adam chris) () 0.5))]
+    [(== [a b c] '((parent allan chris) () 0.25))]
+    [(== [a b c] '((parent aziz chris) () 0.25))]
+    [(== [a b c] '((parent chris diana) () 1))]
+    [(== [a b c] '((parent chris emily) () 0.1))]
+    [(fresh [parent child grandparent]
+       (== a ['grandparent grandparent child])
+       (== b [['parent parent child] ['parent grandparent parent]])
+       (== c 1))]))
+
+(defn make-clause-from-clause-cf [clause-cf]
+  (fn [a b]
+    (fresh [c]
+      (clause-cf a b c))))
+
+(def ex-solver-family (solve-for (make-clause-from-clause-cf solver-family-clause-cf) ))
+
+(def ex-cf-solver-family (solve-cf-for solver-family-clause-cf * *))
 

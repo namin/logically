@@ -39,3 +39,32 @@
   (is (= (run* [q]
            (ex-proof-solver-member ['member 'b '(a b c)] q))
         '(((member b (a b c)) <-- ((member b (b c)) <-- ()))))))
+
+(deftest test-ex-cf-solver-member
+  (is (= (run* [q]
+           (ex-cf-solver-member ['member 'b '(a b c)] q))
+        '(1)))
+  (is (= (run* [q]
+           (ex-cf-solver-member ['member 'x '(a b c)] q))
+        ()))
+  (is (= (run 2 [q]
+           (ex-cf-solver-member ['member 'x q] 1))
+        [(lcons 'x '_0) (lcons '_0 (lcons 'x '_1))])))
+
+(deftest test-ex-solver-family
+  (is (= (run* [q]
+           (fresh [x]
+             (ex-solver-family ['grandparent q 'diana])))
+        '(adam allan aziz))))
+
+(deftest test-ex-cf-solver-family
+  (is (= (run* [q]
+           (fresh [gp c]
+             (ex-cf-solver-family ['grandparent gp 'diana] c)
+             (== q [gp c])))
+        '((adam 0.5) (allan 0.25) (aziz 0.25))))
+  (is (= (run* [q]
+           (fresh [gp c]
+             (ex-cf-solver-family ['grandparent gp 'emily] c)
+             (== q [gp c])))
+        '((adam 0.05) (allan 0.025) (aziz 0.025)))))
