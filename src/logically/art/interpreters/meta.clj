@@ -6,10 +6,8 @@
 ;; Section 17.2 Meta-Interpreters
 
 ;; Program 17.5 A meta-interpreter for pure Prolog
-(defn solve-for [clause]
-  (letfn [(solve0 [goal]
-            (solve [goal]))
-          (solve [goals]
+(defn solve-for* [clause]
+  (letfn [(solve [goals]
             (conde
               [(== goals ())]
               [(fresh [g gs b]
@@ -17,7 +15,10 @@
                  (clause g b)
                  (solve b)
                  (solve gs))]))]
-    solve0))
+    solve))
+(defn solve-for [clause]
+  (let [solver* (solve-for* clause)]
+    (fn [goal] (solver* [goal]))))
 
 (defn solver-member-clause [a b]
   (conde

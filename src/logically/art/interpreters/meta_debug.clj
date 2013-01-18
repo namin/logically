@@ -77,7 +77,7 @@
 (def ex-debug-so-buggy-isort-solver (debug-so-solve-for solver-so-buggy-isort-clause))
 
 ;; Program 17.13 An incorrect and incomplete insertion sort
-(defn solver-false-buggy-isort-clause [a b]
+(defn solver-buggy-isort-clause [a b]
   (conde
     [(fresh [xs ys]
        (== a ['isort xs ys])
@@ -107,7 +107,7 @@
           (== r [x])
           (== b ())]))]))
 
-(def ex-proof-false-buggy-isort-solver (solve-proof-for solver-false-buggy-isort-clause))
+(def ex-proof-false-buggy-isort-solver (solve-proof-for solver-buggy-isort-clause))
 
 ;; Program 17.14 Bottom-up diagnosis of a false solution
 (defn extract-body [pb b1]
@@ -169,7 +169,7 @@
       (println "Assuming " r)
       (bind a (== answer r)))))
 
-(def ex-debug-false-buggy-isort-interactive (debug-false-solution-for solver-false-buggy-isort-clause interactive-oracle))
+(def ex-debug-false-buggy-isort-interactive (debug-false-solution-for solver-buggy-isort-clause interactive-oracle))
 
 (comment
   (doall
@@ -209,17 +209,22 @@
 
 (def ex-solver-isort (solve-for solver-isort-clause))
 
-(defn make-oracle [clause log]
-  (let [solver (solve-for clause)]
-    (fn [goal answer]
-      (fn [a]
-        (let [g (walk* a goal)]
-          (let [r (not (empty? (run 1 [q] (solver g))))]
-            (log g r)
-            (bind a (== answer r))))))))
+(defn make-oracle
+  ([clause] (make-oracle clause nil))
+  ([clause log]
+   (let [solver (solve-for clause)]
+     (fn [goal answer]
+       (fn [a]
+         (let [g (walk* a goal)]
+           (let [r (not (empty? (run 1 [q] (solver g))))]
+             (when log (log g r))
+             (bind a (== answer r)))))))))
 
-(def ex-debug-false-buggy-isort-print (debug-false-solution-for solver-false-buggy-isort-clause (make-oracle solver-isort-clause (fn [g r] (println "Assuming" g r)))))
-(def ex-debug-false-buggy-isort (debug-false-solution-for solver-false-buggy-isort-clause (make-oracle solver-isort-clause (fn [g r]))))
+(def ex-debug-false-buggy-isort-print
+  (debug-false-solution-for solver-buggy-isort-clause
+    (make-oracle solver-isort-clause (fn [g r] (println "Assuming" g r)))))
+(def ex-debug-false-buggy-isort
+  (debug-false-solution-for solver-buggy-isort-clause (make-oracle solver-isort-clause)))
 
 (comment
   (doall
@@ -227,3 +232,46 @@
       (fresh [xs]
         (ex-debug-false-buggy-isort-print ['isort [3 2 1] xs] q)))))
 
+(defn make-subst-oracle
+  ([clause] (make-subst-oracle clause nil))
+  ([clause log]
+   (let [solver* (solve-for* clause)]
+     (fn [a b]
+       (fn [s]
+         (bind*
+           s
+           (onceo (clause a b))
+           (onceo (solver* b))
+           (fn [sp]
+             (when log (log (-reify s (walk* s [a '<-- b])) [(walk* sp [a '<-- b])]))
+             sp)))))))
+
+;; Program 17.16 Diagnosing missing solution
+(defn debug-missing-solution-for [clause subst-oracle]
+  (letfn [(missing-solution0 [goal missing]
+            (missing-solution [goal] missing))
+          (missing-solution [goals missing]
+            (fresh [a b gs]
+              (conso a gs goals)
+              (conda
+                [(clause a b)
+                 (fresh [r]
+                   (subst-oracle a b)
+                   (appendo b gs r)
+                   (missing-solution r missing))]
+                [(subst-oracle a b)
+                 (== a missing)])))]
+    missing-solution0))
+
+(def ex-debug-missing-buggy-isort-print
+  (debug-missing-solution-for solver-buggy-isort-clause
+    (make-subst-oracle solver-isort-clause
+      (fn [before after] (println "before:" before "\nafter: " after "\n")))))
+
+(def ex-debug-missing-buggy-isort
+  (debug-missing-solution-for solver-buggy-isort-clause (make-subst-oracle solver-isort-clause)))
+
+(comment
+  (doall
+    (run* [q]
+      (ex-debug-missing-buggy-isort-print ['isort [2 1 3] [1 2 3]] q))))

@@ -55,3 +55,8 @@
                (!= c 'ok)
                (== q [xs c]))))
         5)))
+
+(deftest test-ex-debug-missing-buggy-isort
+  (is (= (run* [q]
+           (ex-debug-missing-buggy-isort ['isort [2 1 3] [1 2 3]] q))
+        '([insert 1 [3] [1 3]]))))
