@@ -83,11 +83,7 @@
               [(fresh [g gs ts b tb]
                  (conso g gs goals)
                  (clause g b)
-                 (conde
-                   [(!= ts ())
-                    (conso [g '<-- tb] ts tree)]
-                   [(== ts ())
-                    (== [g '<-- tb] tree)])
+                 (conso [g '<-- tb] ts tree)
                  (solve b tb)
                  (solve gs ts))]))]
     solve0))

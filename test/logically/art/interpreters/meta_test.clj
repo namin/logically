@@ -38,7 +38,7 @@
 (deftest test-ex-solver-proof-member
   (is (= (run* [q]
            (ex-proof-solver-member ['member 'b '(a b c)] q))
-        '(((member b (a b c)) <-- ((member b (b c)) <-- ()))))))
+        '((((member b (a b c)) <-- (((member b (b c)) <-- ()))))))))
 
 (deftest test-ex-cf-solver-member
   (is (= (run* [q]
