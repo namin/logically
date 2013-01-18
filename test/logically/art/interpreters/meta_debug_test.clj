@@ -15,7 +15,7 @@
            (ex-debug-so-solver-member ['member 'x '(x y z)] 4 q))
         '(no-overflow))))
 
-(deftest text-ex-debug-so-buggy-isort-solver
+(deftest test-ex-debug-so-buggy-isort-solver
   (is (= (run* [q]
            (fresh [xs]
              (ex-debug-so-buggy-isort-solver ['isort [2 2] xs] 4 q)
@@ -29,3 +29,29 @@
              [insert 2 [2] [2 2 2 2]]
              [insert 2 [2] [2 2 2]]
              [insert 2 [2] [2 2]])]))))
+
+(deftest test-ex-solver-isort
+  (is (= (run* [q]
+           (ex-solver-isort ['insert 2 [1] [2 1]]))
+        ()))
+  (is (= (run* [q]
+           (ex-solver-isort ['isort [2 2] q]))
+        '([2 2])))
+  (is (= (run* [q]
+           (ex-solver-isort ['isort [3 2 1] q]))
+        '([1 2 3]))))
+
+(deftest test-ex-debug-false-buggy-isort
+  (is (= (run 1 [q]
+           (fresh [xs c]
+             (ex-debug-false-buggy-isort ['isort [3 2 1] xs] c)
+             (!= c 'ok)
+             (== q [xs c])))
+        '([[3 2 1] [[insert 2 [1] [2 1]] <-- ()]])))
+  (is (= (count
+           (run* [q]
+             (fresh [xs c]
+               (ex-debug-false-buggy-isort ['isort [3 2 1] xs] c)
+               (!= c 'ok)
+               (== q [xs c]))))
+        5)))

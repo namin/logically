@@ -76,3 +76,154 @@
 
 (def ex-debug-so-buggy-isort-solver (debug-so-solve-for solver-so-buggy-isort-clause))
 
+;; Program 17.13 An incorrect and incomplete insertion sort
+(defn solver-false-buggy-isort-clause [a b]
+  (conde
+    [(fresh [xs ys]
+       (== a ['isort xs ys])
+       (conde
+         [(== xs ())
+          (== ys ())
+          (== b ())]
+         [(fresh [x xt zs]
+            (conso x xt xs)
+            (== b [['isort xt zs] ['insert x zs ys]]))]))]
+    [(fresh [x s r]
+       (== a ['insert x s r])
+       (conde
+         [(fresh [y ys]
+            (conso y ys s)
+            (conde
+              [(conso x s r)
+               (project [x y]
+                 (== (>= x y) true))
+               (== b ())]
+              [(fresh [zs]
+                 (conso y zs r)
+                 (project [x y]
+                   (== (> x y) true))
+                 (== b [['insert x ys zs]]))]))]
+         [(== s ())
+          (== r [x])
+          (== b ())]))]))
+
+(def ex-proof-false-buggy-isort-solver (solve-proof-for solver-false-buggy-isort-clause))
+
+;; Program 17.14 Bottom-up diagnosis of a false solution
+(defn extract-body [pb b1]
+  (conde
+    [(== pb ()) (== b1 ())]
+    [(fresh [a pr r]
+       (conso [a '<-- pr] pr pb)
+       (conso a r b1)
+       (extract-body pr r))]))
+
+(defn debug-false-solution-for [clause oracle]
+  (let [solve (solve-proof-for clause)]
+    (letfn [(false-solution [a c]
+              (fresh [proof]
+                (solve a proof)
+                (false-clause proof c)))
+            (false-clause [proof c]
+              (conde
+                [(== proof ())
+                 (== c 'ok)]
+                [(fresh [a pb ps ca cb]
+                   (conso [a '<-- pb] ps proof)
+                   (false-clause pb cb)
+                   (check-clause cb a pb ca)
+                   (check-conjunction ca ps c))]))
+            (check-conjunction [ca ps c]
+              (conde
+                [(== ca 'ok)
+                 (false-clause ps c)]
+                [(fresh [a b1]
+                   (== ca [a '<-- b1])
+                   (== ca c))]))
+            (check-clause [cb a pb ca]
+              (conde
+                [(== cb 'ok)
+                 (fresh [answer]
+                   (oracle a answer)
+                   (check-answer answer a pb ca))]
+                [(fresh [b b1]
+                   (== cb [b '<-- b1])
+                   (== ca cb))]))
+            (check-answer [answer a pb ca]
+              (conde
+                [(== answer true)
+                 (== ca 'ok)]
+                [(== answer false)
+                 (fresh [b1]
+                   (== ca [a '<-- b1])
+                   (extract-body pb b1))]))]
+      false-solution)))
+
+(defn interactive-oracle [goal answer]
+  (fn [a]
+    (println "Is the goal " (walk* a goal) " true?")
+    (let [r (let [user-answer (read-line)]
+              (if (or (.startsWith user-answer "y") (.startsWith user-answer "t"))
+                true
+                false))]
+      (println "Assuming " r)
+      (bind a (== answer r)))))
+
+(def ex-debug-false-buggy-isort-interactive (debug-false-solution-for solver-false-buggy-isort-clause interactive-oracle))
+
+(comment
+  (doall
+    (run 1 [q]
+      (fresh [xs]
+        (ex-debug-false-buggy-isort-interactive ['isort [3 2 1] xs] q)))))
+
+(defn solver-isort-clause [a b]
+  (conde
+    [(fresh [xs ys]
+       (== a ['isort xs ys])
+       (conde
+         [(== xs ())
+          (== ys ())
+          (== b ())]
+         [(fresh [x xt zs]
+            (conso x xt xs)
+            (== b [['isort xt zs] ['insert x zs ys]]))]))]
+    [(fresh [x s r]
+       (== a ['insert x s r])
+       (conde
+         [(fresh [y ys]
+            (conso y ys s)
+            (conde
+              [(conso x s r)
+               (project [x y]
+                 (== (<= x y) true))
+               (== b ())]
+              [(fresh [zs]
+                 (conso y zs r)
+                 (project [x y]
+                   (== (> x y) true))
+                 (== b [['insert x ys zs]]))]))]
+         [(== s ())
+          (== r [x])
+          (== b ())]))]))
+
+(def ex-solver-isort (solve-for solver-isort-clause))
+
+(defn make-oracle [clause log]
+  (let [solver (solve-for clause)]
+    (fn [goal answer]
+      (fn [a]
+        (let [g (walk* a goal)]
+          (let [r (not (empty? (run 1 [q] (solver g))))]
+            (log g r)
+            (bind a (== answer r))))))))
+
+(def ex-debug-false-buggy-isort-print (debug-false-solution-for solver-false-buggy-isort-clause (make-oracle solver-isort-clause (fn [g r] (println "Assuming" g r)))))
+(def ex-debug-false-buggy-isort (debug-false-solution-for solver-false-buggy-isort-clause (make-oracle solver-isort-clause (fn [g r]))))
+
+(comment
+  (doall
+    (run 1 [q]
+      (fresh [xs]
+        (ex-debug-false-buggy-isort-print ['isort [3 2 1] xs] q)))))
+
