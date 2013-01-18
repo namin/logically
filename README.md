@@ -8,3 +8,4 @@ Explorations of logic programming in Clojure's core.logic.
   * Chapter 17: Interpreters
      * 17.1: Interpreters for Finite State Machines ([src](https://github.com/namin/logically/tree/master/src/logically/art/interpreters/fsm.clj)/[test](https://github.com/namin/logically/tree/master/test/logically/art/interpreters/fsm_test.clj))
      * 17.2: Meta-Interpreters ([src](https://github.com/namin/logically/tree/master/src/logically/art/interpreters/meta.clj)/[test](https://github.com/namin/logically/tree/master/test/logically/art/interpreters/meta_test.clj))
+     * 17.3: Enhanced Meta-Interpreters for Debugging ([src](https://github.com/namin/logically/tree/master/src/logically/art/interpreters/meta_debug.clj)/[test](https://github.com/namin/logically/tree/master/test/logically/art/interpreters/meta_debug_test.clj))
