@@ -43,7 +43,7 @@
 
 (def ex-debug-so-solver-member (debug-so-solve-for solver-member-clause))
 
-;; Program 17.2 A non-terminating insertion sort
+;; Program 17.12 A non-terminating insertion sort
 (defn solver-so-buggy-isort-clause [a b]
   (conde
     [(fresh [xs ys]
