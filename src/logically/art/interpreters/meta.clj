@@ -5,19 +5,19 @@
 
 ;; Section 17.2 Meta-Interpreters
 
-;; Program 17.5 A meta-interpreter for pure Prolog (adapted)
+;; Program 17.5 A meta-interpreter for pure Prolog
 (defn solve-for [clause]
-  (letfn [(solve [goal]
+  (letfn [(solve0 [goal]
+            (solve [goal]))
+          (solve [goals]
             (conde
-              [(== goal ())]
-              [(fresh [g gs]
-                 (conso g gs goal)
-                 (solve g)
-                 (solve gs))]
-              [(fresh [b]
-                 (clause goal b)
-                 (solve b))]))]
-    solve))
+              [(== goals ())]
+              [(fresh [g gs b]
+                 (conso g gs goals)
+                 (clause g b)
+                 (solve b)
+                 (solve gs))]))]
+    solve0))
 
 (defn solver-member-clause [a b]
   (conde
@@ -26,29 +26,27 @@
        (== b ()))]
     [(fresh [x y ys]
        (== a ['member x (lcons y ys)])
-       (== b ['member x ys]))]))
+       (== b [['member x ys]]))]))
 
 (def ex-solver-member (solve-for solver-member-clause))
 
 ;; Program 17.6 A meta-interpreter for pure Prolog in continutation style
 (defn alt-solve-for [clause]
   (letfn [(solve0 [goal]
-            (solve goal ()))
+            (solve [goal] ()))
           (solve [gs1 gs2]
             (conde
               [(== gs1 ())
                (== gs2 ())]
               [(== gs1 ())
-               (fresh [g goals]
-                 (conso g goals gs2)
-                 (solve g goals))]
-              [(fresh [a b goals1]
-                 (conso a b gs1)
-                 (appendo b gs2 goals1)
-                 (solve a goals1))]
-              [(fresh [b]
-                 (clause gs1 b)
-                 (solve b gs2))]))]
+               (fresh [g gs]
+                 (conso g gs gs2)
+                 (solve [g] gs))]
+              [(fresh [g gs gsr b]
+                 (conso g gs gs1)
+                 (clause g b)
+                 (appendo gs gs2 gsr)
+                 (solve b gsr))]))]
     solve0))
 
 (def ex-alt-solver-member (alt-solve-for solver-member-clause))
@@ -56,18 +54,16 @@
 ;; Program 17.7 A tracer for Prolog
 (defn solve-trace-for [clause]
   (letfn [(solve0 [goal]
-            (solve goal 0))
-          (solve [goal depth]
+            (solve [goal] 0))
+          (solve [goals depth]
             (conde
-              [(== goal ())]
-              [(fresh [g gs]
-                 (conso g gs goal)
-                 (solve g depth)
-                 (solve gs depth))]
-              [(fresh [b]
-                 (clause goal b)
-                 (display goal depth)
-                 (solve b (inc depth)))]))
+              [(== goals ())]
+              [(fresh [g gs b]
+                 (conso g gs goals)
+                 (clause g b)
+                 (display g depth)
+                 (solve b (inc depth))
+                 (solve gs depth))]))
            (display [goal depth]
              (fn [a]
                (println (apply str (repeat depth "   ")) (walk* a goal))
@@ -78,39 +74,42 @@
 
 ;; Program 17.8 A meta-interpreter for building a proof tree
 (defn solve-proof-for [clause]
-  (letfn [(solve [goal tree]
+  (letfn [(solve0 [goal tree]
+            (solve [goal] tree))
+          (solve [goals tree]
             (conde
-              [(== goal ())
+              [(== goals ())
                (== tree ())]
-              [(fresh [g gs t ts]
-                 (conso g gs goal)
-                 (conso t ts tree)
-                 (solve g t)
-                 (solve t ts))]
-              [(fresh [b t]
-                 (clause goal b)
-                 (== [goal '<-- t] tree)
-                 (solve b t))]))]
-    solve))
+              [(fresh [g gs ts b tb]
+                 (conso g gs goals)
+                 (clause g b)
+                 (conde
+                   [(!= ts ())
+                    (conso [g '<-- tb] ts tree)]
+                   [(== ts ())
+                    (== [g '<-- tb] tree)])
+                 (solve b tb)
+                 (solve gs ts))]))]
+    solve0))
 
 (def ex-proof-solver-member (solve-proof-for solver-member-clause))
 
 ;; Program 17.9 A meta-interpreter for reasoning about uncertainty
 (defn solve-cf-for [clause-cf chain-cf conj-cf]
-  (letfn [(solve [goal certainty]
+  (letfn [(solve0 [goal certainty]
+            (solve [goal] certainty))
+          (solve [goals certainty]
             (conde
-              [(== goal ())
+              [(== goals ())
                (== certainty 1)]
-              [(fresh [g gs c1 c2]
-                 (conso g gs goal)
-                 (solve g c1)
-                 (solve gs c2)
-                 (project [c1 c2] (== certainty (conj-cf c1 c2))))]
-              [(fresh [b c1 c2]
-                 (clause-cf goal b c1)
-                 (solve b c2)
-                 (project [c1 c2] (== certainty (chain-cf c1 c2))))]))]
-    solve))
+              [(fresh [g gs b cg cb cs]
+                 (conso g gs goals)
+                 (clause-cf g b cg)
+                 (solve b cb)
+                 (solve gs cs)
+                 (project [cg cb cs]
+                   (== certainty (conj-cf (chain-cf cg cb) cs))))]))]
+    solve0))
 
 (defn make-clause-cf [clause]
   (fn [a b c]
@@ -135,7 +134,7 @@
        (== c 1))]
     [(fresh [parent child]
        (== a ['ancestor parent child])
-       (== b ['parent parent child])
+       (== b [['parent parent child]])
        (== c 1))]
     [(fresh [ancestor parent child]
        (== a ['ancestor ancestor child])
@@ -153,22 +152,22 @@
 
 ;; Program 17.10 Reasoning with uncertainty with threshold cutoff
 (defn solve-cft-for [clause-cf chain-cf conj-cf chain-t]
-  (letfn [(solve [goal certainty t]
+  (letfn [(solve0 [goal certainty t]
+            (solve [goal] certainty t))
+          (solve [goals certainty t]
             (conde
-              [(== goal ())
+              [(== goals ())
                (== certainty 1)]
-              [(fresh [g gs c1 c2]
-                 (conso g gs goal)
-                 (solve g c1 t)
-                 (solve gs c2 t)
-                 (project [c1 c2] (== certainty (conj-cf c1 c2))))]
-              [(fresh [b c1 c2 t1]
-                 (clause-cf goal b c1)
-                 (project [t c1]
-                   (== (> c1 t) true)
-                   (== t1 (chain-t t c1)))
-                 (solve b c2 t1)
-                 (project [c1 c2] (== certainty (chain-cf c1 c2))))]))]
-    solve))
+              [(fresh [g gs b cg cb cs tb]
+                 (conso g gs goals)
+                 (clause-cf g b cg)
+                 (project [t cg]
+                   (== (> cg t) true)
+                   (== tb (chain-t t cg)))
+                 (solve b cb tb)
+                 (solve gs cs t)
+                 (project [cg cb cs]
+                   (== certainty (conj-cf (chain-cf cg cb) cs))))]))]
+    solve0))
 
 (def ex-cft-solver-family (solve-cft-for solver-family-clause-cf * * /))
