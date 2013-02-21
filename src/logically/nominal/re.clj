@@ -4,6 +4,9 @@
         [clojure.core.logic.nominal :exclude [fresh hash] :as nom])
 )
 
+;; Inspired by Regular expression and automata example of alphaProlog
+;; http://homepages.inf.ed.ac.uk/jcheney/programs/aprolog/
+
 (defn nfao [start delta accepting nfa]
   (== nfa ['nfa start delta accepting]))
 
@@ -64,3 +67,77 @@
     (starto nfa q)
     (traceo* nfa q l qs)))
 
+(defn sep [x]
+  (map #(symbol (str %)) x))
+
+(def one 'one)
+(def zero 'zero)
+(defn plus [r1 r2] ['plus r1 r2])
+(defn prod [r1 r2] ['prod r1 r2])
+(defn star [r] ['star r])
+(defn s [c] ['char c])
+(def symb s)
+
+(defn oneo [r] (== r one))
+(defn zeroo [r] (== r zero))
+(defn pluso [r1 r2 r] (== r (plus r1 r2)))
+(defn prodo [r1 r2 r] (== r (prod r1 r2)))
+(defn staro [r0 r] (== r (star r0)))
+(defn symbo [c r] (all (!= c nil) (== r (symb c))))
+
+(defn disjo [l1 l2]
+  (conde
+    [(== l1 [])]
+    [(fresh [a b c l]
+       (conso [a c b] l l1)
+       (nom/hash a l2)
+       (nom/hash b l2)
+       (disjo l l2))]))
+
+(defn equivo [r nfa]
+  (nom/fresh [a b]
+    (conde
+      [(oneo r)
+        (nfao a [[a nil b]] [b] nfa)]
+      [(zeroo r)
+        (nfao a [] [b] nfa)]
+      [(fresh [c]
+         (symbo c r)
+         (nfao a [[a c b]] [b] nfa))]
+      [(fresh [r1 r2 nfa1 nfa2 sa sb sc sd l1 l2 l3 lr]
+         (pluso r1 r2 r)
+         (appendo [[a nil sa] [a nil sc] [sb nil b] [sd nil b]] l3 lr)
+         (nfao a lr [b] nfa)
+         (nfao sa l1 [sb] nfa1)
+         (nfao sc l2 [sd] nfa2)
+         (equivo r1 nfa1)
+         (equivo r2 nfa2)
+         (disjo l1 l2)
+         (appendo l1 l2 l3)
+         (nom/hash a l3)
+         (nom/hash b l3))]
+      [(fresh [r1 r2 nfa1 nfa2 sa sb sc sd l1 l2 l3]
+         (prodo r1 r2 r)
+         (nfao sa (lcons [sb nil sc] l3) [sd] nfa)
+         (nfao sa l1 [sb] nfa1)
+         (nfao sc l2 [sd] nfa2)
+         (equivo r1 nfa1)
+         (equivo r2 nfa2)
+         (disjo l1 l2)
+         (appendo l1 l2 l3))]
+      [(fresh [r0 nfa0 sa sb l0 lr]
+         (staro r0 r)
+         (appendo [[a nil b] [sb nil sa] [a nil sa] [sb nil b]] l0 lr)
+         (nfao a lr [b] nfa)
+         (nfao sa l0 [sb] nfa0)
+         (nom/hash a l0)
+         (nom/hash b l0)
+         (equivo r0 nfa0))])))
+
+(defn literalo [cs r]
+  (conde
+    [(== cs []) (oneo r)]
+    [(fresh [c cs2 r2]
+       (conso c cs2 cs)
+       (prodo (symb c) r2 r)
+       (literalo cs2 r2))]))
