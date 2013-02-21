@@ -10,7 +10,7 @@ Explorations of logic programming in Clojure's core.logic.
      * 17.2: Meta-Interpreters ([src](src/logically/art/interpreters/meta.clj)/[test](test/logically/art/interpreters/meta_test.clj))
      * 17.3: Enhanced Meta-Interpreters for Debugging ([src](src/logically/art/interpreters/meta_debug.clj)/[test](test/logically/art/interpreters/meta_debug_test.clj))
 
-
+<p></p>
 
 * [_αProlog_](http://homepages.inf.ed.ac.uk/jcheney/programs/aprolog/) for [nominal logic programming](http://arxiv.org/abs/cs/0609062)
   * Regular expressions and automata ([src](src/logically/nominal/re.clj)/[test](test/logically/nominal/re_test.clj))
