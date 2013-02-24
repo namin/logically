@@ -167,7 +167,7 @@
                 true
                 false))]
       (println "Assuming " r)
-      (bind a (== answer r)))))
+      (bind* a (== answer r)))))
 
 (def ex-debug-false-buggy-isort-interactive (debug-false-solution-for solver-buggy-isort-clause interactive-oracle))
 
@@ -218,7 +218,7 @@
          (let [g (walk* a goal)]
            (let [r (not (empty? (run 1 [q] (solver g))))]
              (when log (log g r))
-             (bind a (== answer r)))))))))
+             (bind* a (== answer r)))))))))
 
 (def ex-debug-false-buggy-isort-print
   (debug-false-solution-for solver-buggy-isort-clause
