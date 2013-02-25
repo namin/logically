@@ -14,4 +14,5 @@ Explorations of logic programming in Clojure's core.logic.
 
 * [_αProlog_](http://homepages.inf.ed.ac.uk/jcheney/programs/aprolog/) for [nominal logic programming](http://arxiv.org/abs/cs/0609062)
   * Regular expressions and automata ([src](src/logically/nominal/re.clj)/[test](test/logically/nominal/re_test.clj))
+  * Symbolic differentiation ([src](src/logically/nominal/diff.clj)/[test](test/logically/nominal/diff_test.clj))
 
