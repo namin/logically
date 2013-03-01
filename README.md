@@ -16,4 +16,5 @@ Explorations of logic programming in Clojure's core.logic.
   * Regular expressions and automata ([src](src/logically/nominal/re.clj)/[test](test/logically/nominal/re_test.clj))
   * Symbolic differentiation ([src](src/logically/nominal/diff.clj)/[test](test/logically/nominal/diff_test.clj))
   * The pi-calculus operational semantics ([src](src/logically/nominal/picalc.clj)/[test](test/logically/nominal/picalc_test.clj))
+  * Cryptographic authentication protocols (Needham-Schroeder(-Lowe)) ([src](src/logically/nominal/nsl.clj)/[test](test/logically/nominal/nsl_test.clj))
 
