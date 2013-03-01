@@ -6,11 +6,24 @@
   (:use [clojure.test]))
 
 (deftest test-all-1
-  (is (= (run 1 [q] (ns-typicalo [] q))
-        '(([enc [pub bob] [nonce a_0]] [enc [pub alice] [pair [nonce a_1] [nonce a_0]]] [enc [pub bob] [pair [nonce a_1] [nm alice]]]))))
-  (is (= (run 1 [q] (ns-attacko [] q))
-        '(([enc [pub bob] [nonce a_0]] [enc [pub eve] [nonce a_0]] [enc [pub alice] [pair [nonce a_1] [nonce a_0]]] [enc [pub bob] [pair [nonce a_1] [nm alice]]] [enc [pub eve] [pair [nonce a_1] [nm alice]]]))))
-  (is (= (run 1 [q] (nsl-typicalo [] q))
-        '(([enc [pub bob] [nonce a_0]] [enc [pub alice] [pair [pair [nonce a_1] [nonce a_0]] [nm bob]]] [enc [pub bob] [pair [nonce a_1] [nm alice]]]))))
-  (is (= (run 1 [q] (nsl-attacko [] q))
+  (is (= (run* [q] (ns-typicalo [] q))
+        '(([enc [pub bob] [nonce a_0]]
+           [enc [pub alice] [pair [nonce a_1] [nonce a_0]]]
+           [enc [pub bob] [pair [nonce a_1] [nm alice]]]))))
+  (is (= (run* [q] (ns-attacko [] q))
+        '(([enc [pub bob] [nonce a_0]]
+           [enc [pub eve] [nonce a_0]]
+           [enc [pub alice] [pair [nonce a_1] [nonce a_0]]]
+           [enc [pub bob] [pair [nonce a_1] [nm alice]]]
+           [enc [pub eve] [pair [nonce a_1] [nm alice]]])
+          ([enc [pub bob] [pair [nonce a_0] [nm alice]]]
+           [enc [pub eve] [nonce a_1]]
+           [enc [pub alice] [pair [nonce a_0] [nonce a_1]]]
+           [enc [pub bob] [pair [nonce a_0] [nm alice]]]
+           [enc [pub eve] [pair [nonce a_0] [nm alice]]]))))
+  (is (= (run* [q] (nsl-typicalo [] q))
+        '(([enc [pub bob] [nonce a_0]]
+           [enc [pub alice] [pair [pair [nonce a_1] [nonce a_0]] [nm bob]]]
+           [enc [pub bob] [pair [nonce a_1] [nm alice]]]))))
+  (is (= (run* [q] (nsl-attacko [] q))
         '())))
