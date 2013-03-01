@@ -42,23 +42,29 @@
     (deco msg ['pri a] ['pair ['nonce m] ['nonce n]])
     (sendo ['enc ['pub b] ['nonce n]] ms1 ms2)))
 
-(defn ns-typicalo [msa msb]
-  (fresh [ms1 ms2]
-    (ns-step1-o 'alice 'bob msa ms1)
-    (ns-step2-o 'bob 'alice ms1 ms2)
-    (ns-step3-o 'alice 'bob ms2 msb)))
+(defn typicalo [s1o s2o s3o]
+  (fn [msa msb]
+    (fresh [ms1 ms2]
+      (s1o 'alice 'bob msa ms1)
+      (s2o 'bob 'alice ms1 ms2)
+      (s3o 'alice 'bob ms2 msb))))
 
-(defn ns-attacko [msa msb]
-  (fresh [m1 n1 m3 n3 ms1 ms2 ms3 ms4]
-    (ns-step1-o 'alice 'eve msa ms1)
-    (recvo m1 ms1)
-    (deco m1 ['pri 'eve] n1)
-    (sendo ['enc ['pub 'bob] n1] ms1 ms2)
-    (ns-step2-o 'bob 'alice ms2 ms3)
-    (ns-step3-o 'alice 'eve ms3 ms4)
-    (recvo m3 ms4)
-    (deco m3 ['pri 'eve] n3)
-    (sendo ['enc ['pub 'bob] n3] ms4 msb)))
+(defn attacko [s1o s2o s3o]
+  (fn [msa msb]
+    (fresh [m1 n1 m3 n3 ms1 ms2 ms3 ms4]
+      (s1o 'alice 'eve msa ms1)
+      (recvo m1 ms1)
+      (deco m1 ['pri 'eve] n1)
+      (sendo ['enc ['pub 'bob] n1] ms1 ms2)
+      (s2o 'bob 'alice ms2 ms3)
+      (s3o 'alice 'eve ms3 ms4)
+      (recvo m3 ms4)
+      (deco m3 ['pri 'eve] n3)
+      (sendo ['enc ['pub 'bob] n3] ms4 msb))))
+
+(def ns-typicalo (typicalo ns-step1-o ns-step2-o ns-step3-o))
+
+(def ns-attacko (attacko ns-step1-o ns-step2-o ns-step3-o))
 
 (defn nsl-step1-o [a b ms1 ms2]
   (fresh [m]
@@ -78,20 +84,6 @@
     (deco msg ['pri a] ['pair ['pair ['nonce m] ['nonce n]] ['nm b]])
     (sendo ['enc ['pub b] ['nonce n]] ms1 ms2)))
 
-(defn nsl-typicalo [msa msb]
-  (fresh [ms1 ms2]
-    (nsl-step1-o 'alice 'bob msa ms1)
-    (nsl-step2-o 'bob 'alice ms1 ms2)
-    (nsl-step3-o 'alice 'bob ms2 msb)))
+(def nsl-typicalo (typicalo nsl-step1-o nsl-step2-o nsl-step3-o))
 
-(defn nsl-attacko [msa msb]
-  (fresh [m1 n1 m3 n3 ms1 ms2 ms3 ms4]
-    (nsl-step1-o 'alice 'eve msa ms1)
-    (recvo m1 ms1)
-    (deco m1 ['pri 'eve] n1)
-    (sendo ['enc ['pub 'bob] n1] ms1 ms2)
-    (nsl-step2-o 'bob 'alice ms2 ms3)
-    (nsl-step3-o 'alice 'eve ms3 ms4)
-    (recvo m3 ms4)
-    (deco m3 ['pri 'eve] n3)
-    (sendo ['enc ['pub 'bob] n3] ms4 msb)))
+(def nsl-attacko (attacko nsl-step1-o nsl-step2-o nsl-step3-o))
