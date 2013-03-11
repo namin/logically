@@ -12,9 +12,14 @@ Explorations of logic programming in Clojure's core.logic.
 
 <p></p>
 
+* [_Prolog Programming for Artificial Intelligence_](http://www.amazon.com/Programming-Artificial-Intelligence-International-Computer/dp/0321417461)
+  * Chapter 25: Meta-Programming
+    * 25.6: Explanation-based generalization ([src](src/logically/ai/meta/ebg.clj)/[test](test/logically/ai/meta/ebg_test.clj))
+
+<p></p>
+
 * [_αProlog_](http://homepages.inf.ed.ac.uk/jcheney/programs/aprolog/) for [nominal logic programming](http://arxiv.org/abs/cs/0609062)
   * Regular expressions and automata ([src](src/logically/nominal/re.clj)/[test](test/logically/nominal/re_test.clj))
   * Symbolic differentiation ([src](src/logically/nominal/diff.clj)/[test](test/logically/nominal/diff_test.clj))
   * The pi-calculus operational semantics ([src](src/logically/nominal/picalc.clj)/[test](test/logically/nominal/picalc_test.clj))
   * Cryptographic authentication protocols (Needham-Schroeder(-Lowe)) ([src](src/logically/nominal/nsl.clj)/[test](test/logically/nominal/nsl_test.clj))
-
