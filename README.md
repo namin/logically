@@ -14,7 +14,7 @@ Explorations of logic programming in Clojure's core.logic.
 
 * [_Prolog Programming for Artificial Intelligence_](http://www.amazon.com/Programming-Artificial-Intelligence-International-Computer/dp/0321417461)
   * Chapter 25: Meta-Programming
-    * 25.6: Explanation-based generalization ([src](src/logically/ai/meta/ebg.clj)/[test](test/logically/ai/meta/ebg_test.clj))
+     * 25.6: Explanation-based generalization ([src](src/logically/ai/meta/ebg.clj)/[test](test/logically/ai/meta/ebg_test.clj))
 
 <p></p>
 
