@@ -1,6 +1,6 @@
-(defproject logically "0.1.1-SNAPSHOT"
+(defproject logically "0.1.2-SNAPSHOT"
   :description "explorations of core.logic"
   :url "https://github.com/namin/logically"
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [org.clojure/core.logic "0.8.0-rc3-SNAPSHOT"]
+                 [org.clojure/core.logic "0.8.0-rc3"]
                  [org.clojure/core.match "0.2.0-alpha12"]])
