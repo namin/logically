@@ -35,8 +35,8 @@
   (is (= (run 3 [q] (fresh [a b c d] (== q [a b c d]) (naturals d (plus a b c))))
          '([z _0 _0 plus-z]
            [(s z) _0 (s _0) (plus-s plus-z)]
-           [(s (s z)) _0 (s (s _0)) (plus-s (plus-s plus-z))]))))
-
-
-
-
+           [(s (s z)) _0 (s (s _0)) (plus-s (plus-s plus-z))])))
+  (is (= (run* [q] (fresh [a b d] (naturals a (plus z z z)) (naturals d (sum-inc a b)) (naturals b q)))
+         '((plus z _0 _0))))
+  (is (= (run 3 [q] (fresh [a b d] (naturals d (sum-inc a b)) (naturals b q)))
+         '((plus z _0 _0) (plus (s z) _0 (s _0)) (plus (s (s z)) _0 (s (s _0)))))))
