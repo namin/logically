@@ -26,6 +26,7 @@
         a (gensym "a")
         b (gensym "b")]
     `(do
+       (declare ~(symbol (str `~name '*)))
        ~@(map (fn [[tag [ps & spec]]]
                 (let [vspec (vec spec)
                       tspec (vec (map (fn [s] (if (vector? s) (nth s 1) s)) vspec))
@@ -34,6 +35,17 @@
                       ts (vec (map (fn [x s] (if (vector? s) (nth s 0) (gensym "x"))) (range 0 (- n 1)) vspec))]
                    `(do
                       (defn ~tag [~@ps ~@ts] (cons '~tag [~@ps ~@ts]))
+                      (defn ~(symbol (str `~tag '-typechecks)) []
+                        ~(if (= ty typ)
+                           `true
+                           `(not
+                             (empty?
+                              (run 1 [q#]
+                                   (fresh [~@ps ~@ts]
+                                          (~(symbol (str `~name '*))
+                                           [[~ty ~typ] ~@(for [i (range 0 (- n 1))
+                                                               :let [si (tspec i)]]
+                                                           `[~si ~typ])])))))))
                       (defn ~(symbol (str `~tag '-clause)) [~c ~a ~b]
                         (fresh [~@ps ~@ts]
                                (== ~c (cons '~tag [~@ps ~@ts]))
@@ -43,13 +55,20 @@
                                                      si (tspec i)]]
                                            `[~ti ~si])]))))))
               clauses)
+       (defn ~(symbol (str `~name '-ok)) []
+         (and
+          ~@(map (fn [[tag _]]
+                   `(if (~(symbol (str `~tag '-typechecks))) true
+                        (do (println (str '~tag " clause does not typecheck."))
+                            false)))
+                 clauses)))
        (defn ~(symbol (str `~name '-clauses)) [~c ~a ~b]
          (conde
           ~@(map (fn [[tag _]]
                    `[(~(symbol (str `~tag '-clause)) ~c ~a ~b)])
                  clauses)))
-       (def ~name (solve-for ~(symbol (str `~name '-clauses))))
-       (def ~(symbol (str `~name '*)) (solve-for*  ~(symbol (str `~name '-clauses)))))))
+       (def ~(symbol (str `~name '*)) (solve-for*  ~(symbol (str `~name '-clauses))))
+       (def ~name (solve-for ~(symbol (str `~name '-clauses)))))))
 
 (defc naturals
   [nat       [[] typ]]
@@ -60,7 +79,7 @@
   [plus-s    [[n1# n2# n3#] (plus n1# n2# n3#) (plus (s n1#) n2# (s n3#))]]
   [sum-inc   [[n1# n2# n3#] (plus n1# n2# n3#) (plus n1# (s n2#) (s n3#)) typ]]
   [sum-inc-z [[n#] (sum-inc n# n# n# (plus-z n#) (plus-z (s n#)))]]
-  [sum-inc-s [[n1# n2# n3# d1# d2#] (sum-inc n1# n2# n3# d1# d2#) (sum-inc n1# n2# n3# (plus-s n1# n2# n3# d1#) (plus-s n1# (s n2#) (s n3#) d2#))]]
+  [sum-inc-s [[n1# n2# n3# d1# d2#] (sum-inc n1# n2# n3# d1# d2#) (sum-inc (s n1#) n2# (s n3#) (plus-s n1# n2# n3# d1#) (plus-s n1# (s n2#) (s n3#) d2#))]]
   [plus-eq-deriv [[n1# n2# n3# n4# n5# n6#] (plus n1# n2# n3#) (plus n4# n5# n6#) typ]]
   [plus-eq-deriv-z [[n1# n2#] (plus-eq-deriv (z) n1# n1# (z) n2# n2# (plus-z n1#) (plus-z n2#))]]
   [plus-eq-deriv-s [[n1# n2# n3# n4# n5# n6# p1# p2#] (plus-eq-deriv n1# n2# n3# n4# n5# n6# p1# p2#) (plus-eq-deriv (s n1#) n2# (s n3#) (s n4#) n5# (s n6#) (plus-s n1# n2# n3# p1#) (plus-s n4# n5# n6# p2#))]]
