@@ -79,7 +79,7 @@
              (plus-s _0 _1 _2 _3)
              (plus-s _0 _1 _2 _4)
              (plus-eq-deriv-s _0 _1 _2 _0 _1 _2 _3 _4 _5))
-            [[_6 (plus-uniq-deriv _0 _1 _2 _3 _4 _5)]]])))
+           [[_6 (plus-uniq-deriv _0 _1 _2 _3 _4 _5)]]])))
   (is (= (run 3 [q] (naturals q (nat)))
          '((z) (s (z)) (s (s (z))))))
   (is (= (run* [q] (fresh [n] (naturals q (plus (z) n n))))
