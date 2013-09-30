@@ -14,11 +14,13 @@
                      (solve b)
                      (solve gs))]))]
     solve))
+
 (defn solve-for [clause]
   (let [solver* (solve-for* clause)]
     (fn [c a] (solver* [[c a]]))))
 
 (def typ 'typ)
+
 (defmacro defc [name & clauses]
   (let [c (gensym "c")
         a (gensym "a")
@@ -26,9 +28,10 @@
     `(do
        ~@(map (fn [[tag [ps & spec]]]
                 (let [vspec (vec spec)
-                      n (count vspec)
-                      ty (nth vspec (- n 1))
-                      ts (vec (map (fn [x] (gensym "x")) (range 0 (- n 1))))]
+                      tspec (vec (map (fn [s] (if (vector? s) (nth s 1) s)) vspec))
+                      n (count tspec)
+                      ty (nth tspec (- n 1))
+                      ts (vec (map (fn [x s] (if (vector? s) (nth s 0) (gensym "x"))) (range 0 (- n 1)) vspec))]
                    `(do
                       ~(if (empty? ts)
                          `(def ~tag '~tag)
@@ -39,7 +42,7 @@
                                (== ~a ~ty)
                                (== ~b [~@(for [i (range 0 (- n 1))
                                                :let [ti (ts i)
-                                                     si (vspec i)]]
+                                                     si (tspec i)]]
                                            `[~ti ~si])]))))))
               clauses)
        (defn ~(symbol (str `~name '-clauses)) [~c ~a ~b]
@@ -47,7 +50,8 @@
           ~@(map (fn [[tag _]]
                    `[(~(symbol (str `~tag '-clause)) ~c ~a ~b)])
                  clauses)))
-       (def ~name (solve-for ~(symbol (str `~name '-clauses)))))))
+       (def ~name (solve-for ~(symbol (str `~name '-clauses))))
+       (def ~(symbol (str `~name '*)) (solve-for*  ~(symbol (str `~name '-clauses)))))))
 
 (defc naturals
   [nat       [[] typ]]
@@ -58,4 +62,10 @@
   [plus-s    [[n1# n2# n3#] (plus n1# n2# n3#) (plus (s n1#) n2# (s n3#))]]
   [sum-inc   [[n1# n2# n3#] (plus n1# n2# n3#) (plus n1# (s n2#) (s n3#)) typ]]
   [sum-inc-z [[] (sum-inc plus-z plus-z)]]
-  [sum-inc-s [[d1# d2#] (sum-inc d1# d2#) (sum-inc (plus-s d1#) (plus-s d2#))]])
+  [sum-inc-s [[d1# d2#] (sum-inc d1# d2#) (sum-inc (plus-s d1#) (plus-s d2#))]]
+  [plus-eq-deriv [[n1# n2# n3# n4# n5# n6#] (plus n1# n2# n3#) (plus n4# n5# n6#) typ]]
+  [plus-eq-deriv-z [[] (plus-eq-deriv plus-z plus-z)]]
+  [plus-eq-deriv-s [[p1# p2#] (plus-eq-deriv p1# p2#) (plus-eq-deriv (plus-s p1#) (plus-s p2#))]]
+  [plus-uniq-deriv [[n1# n2# n3#] [p1# (plus n1# n2# n3#)] [p2# (plus n1# n2# n3#)] (plus-eq-deriv p1# p2#) typ]]
+  [plus-uniq-deriv-z [[] (plus-uniq-deriv plus-z plus-z plus-eq-deriv-z)]]
+  [plus-uniq-deriv-s [[p1# p2# s#] (plus-uniq-deriv p1# p2# s#) (plus-uniq-deriv (plus-s p1#) (plus-s p2#) (plus-eq-deriv-s s#))]])
