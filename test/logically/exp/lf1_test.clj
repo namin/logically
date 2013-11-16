@@ -1,5 +1,5 @@
 (ns logically.exp.lf1_test
-  (:use [logically.exp.lf1] :reload)
+  (:use [logically.exp.lf1.naturals])
   (:refer-clojure :exclude [==])
   (:use [clojure.core.logic :exclude [is] :as l]
         [clojure.core.logic.nominal :exclude [fresh hash] :as nom])
@@ -7,7 +7,7 @@
 
 (deftest test-naturals
   (is (naturals-ok))
-  (is (= (run* [q] (fresh [a b c] (== q [c a b]) (naturals-clauses c a b) (== a typ)))
+  (is (= (run* [q] (fresh [a b c] (== q [c a b]) (naturals-clauses c a b) (== a 'typ)))
          '([(nat) typ []]
            [(plus _0 _1 _2) typ [[_0 (nat)] [_1 (nat)] [_2 (nat)]]]
            [(sum-inc _0 _1 _2 _3 _4)
