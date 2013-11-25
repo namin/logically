@@ -25,4 +25,6 @@ Explorations of logic programming in Clojure's core.logic.
   * Cryptographic authentication protocols (Needham-Schroeder(-Lowe)) ([src](src/logically/nominal/nsl.clj)/[test](test/logically/nominal/nsl_test.clj))
 
 * [_Meta-Circular Abstract Interpretation_](http://www.cs.bgu.ac.il/~mcodish/Tutorial/)
-  * Basic Interpretation and Abstraction ([src](src/logically/abs/meta.clj)/[test](test/logically/abs/meta_test.clj))
+  * 2 Interpretation and Abstraction ([src](src/logically/abs/meta.clj)/[test](test/logically/abs/meta_test.clj))
+  * 3 Concrete Semantics and Interpreters
+    * 3.1 Observing the Success Set ([src](src/logically/abs/tp_gr.clj)/[test](test/logically/abs/tp_gr_test.clj))
