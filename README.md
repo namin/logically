@@ -23,3 +23,6 @@ Explorations of logic programming in Clojure's core.logic.
   * Symbolic differentiation ([src](src/logically/nominal/diff.clj)/[test](test/logically/nominal/diff_test.clj))
   * The pi-calculus operational semantics ([src](src/logically/nominal/picalc.clj)/[test](test/logically/nominal/picalc_test.clj))
   * Cryptographic authentication protocols (Needham-Schroeder(-Lowe)) ([src](src/logically/nominal/nsl.clj)/[test](test/logically/nominal/nsl_test.clj))
+
+* [_Meta-Circular Abstract Interpretation_](http://www.cs.bgu.ac.il/~mcodish/Tutorial/)
+  * Basic Interpretation and Abstraction ([src](src/logically/abs/meta.clj)/[test](test/logically/abs/meta_test.clj))
