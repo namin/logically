@@ -1,5 +1,6 @@
 (ns logically.abs.tp_gr_test
   (:use [logically.abs.tp_gr] :reload)
+  (:use [logically.abs.ex_path] :reload)
   (:refer-clojure :exclude [==])
   (:use [clojure.core.logic :exclude [is] :as l]
         [clojure.core.logic.nominal :exclude [fresh hash] :as nom])

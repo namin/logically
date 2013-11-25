@@ -5,26 +5,6 @@
 
 ;; 3.1 of http://www.cs.bgu.ac.il/~mcodish/Tutorial/
 
-(defn path-clause [head body]
-  (conde
-   [(fresh [x y]
-           (== head [:path x y])
-           (== body [[:edge x y]]))]
-   [(fresh [x y z]
-           (== head [:path x y])
-           (== body [[:edge x z] [:path z y]]))]
-   [(== body ())
-    (conde
-     [(== head [:edge :a :b])]
-     [(== head [:edge :b :a])]
-     [(== head [:edge :a :c])])]))
-
-(defn path-symbol [x]
-  (conde
-   [(== x :a)]
-   [(== x :b)]
-   [(== x :c)]))
-
 (defn prove [c s xs l]
   (conde
    [(fresh [x xr]
@@ -86,7 +66,3 @@
            (deriveo c s facts facts1)
            (extendo facts1 facts ext () diff1)
            (iterate-tp c s ext diff1 result))]))
-
-
-
-
