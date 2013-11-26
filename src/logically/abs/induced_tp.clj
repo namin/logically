@@ -20,8 +20,8 @@
 
 (defn operatoro [db c]
   (fresh [head body]
-         (c head body)
          (db-get-fact db [:call head])
+         (c head body)
          (prove db body)
          (set-union db [:ans head])))
 
