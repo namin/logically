@@ -8,6 +8,7 @@
 
 (deftest test-ack
   (let [r (set (run* [q] (fresh [res] (go ack-clause [:ack [:s [:s 0]] [:s [:s 0]] res] q))))]
+    (is (count r) 30)
     (is (contains? r
                    [:ans
                     [:ack
