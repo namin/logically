@@ -15,5 +15,12 @@
     (do (swap! db #(-> % (pldb/db-fact fact (walk* a f))))
         a)))
 
+(defn db-retract-fact! [db f]
+  (all
+   (db-get-fact db f)
+   (fn [a]
+     (do (swap! db #(-> % (pldb/db-retraction fact (walk* a f))))
+         a))))
+
 (defn db-new []
   (atom (pldb/db)))

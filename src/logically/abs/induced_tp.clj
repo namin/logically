@@ -1,23 +1,29 @@
-(ns logically.abs.tp
+(ns logically.abs.induced_tp
   (:refer-clojure :exclude [==])
   (:use [clojure.core.logic :exclude [is] :as l]
         [clojure.core.logic.nominal :exclude [fresh hash] :as nom])
-  (:use [logically.abs.db]
-        [logically.abs.lub]))
+  (:use [logically.abs.db])
+  (:use [logically.abs.lub] :reload))
 
 (defn prove [db goals]
   (conde
    [(fresh [b bs]
            (conso b bs goals)
-           (db-get-fact db b)
-           (prove db bs))]
+           (conda
+            [(set-union db [:call b])
+             (db-get-fact db [:ans b])
+             (prove db bs)]
+            [(all
+              (db-get-fact db [:ans b])
+              (prove db bs))]))]
    [(== goals ())]))
 
 (defn operatoro [db c]
   (fresh [head body]
          (c head body)
+         (db-get-fact db [:call head])
          (prove db body)
-         (set-union db head)))
+         (set-union db [:ans head])))
 
 (defn iterateo [db c]
   (conda
@@ -25,8 +31,9 @@
    [(db-retract-fact! db :flag) (iterateo db c)]
    [succeed]))
 
-(defn go [c q]
+(defn go [c g q]
   (let [db (db-new)]
     (all
+     (db-add-fact! db [:call g])
      (iterateo db c)
      (db-get-fact db q))))

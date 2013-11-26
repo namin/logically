@@ -5,7 +5,6 @@
   (:use [logically.abs.db]))
 
 (defn set-union [db f]
-  (fresh [g]
-         (copy-term f g)
-         (conda [(db-get-fact db g) fail]
-                [(db-add-fact! db f)])))
+  (conda [(db-get-fact db f) fail]
+         [(db-add-fact! db f)
+          (db-add-fact! db :flag)]))
