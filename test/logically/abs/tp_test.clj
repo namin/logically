@@ -6,9 +6,8 @@
         [clojure.core.logic.nominal :exclude [fresh hash] :as nom])
   (:use [clojure.test]))
 
-(defrel db p)
 (deftest test-path
-  (is (= (set (run* [q] (go db path-clause q)))
+  (is (= (set (run* [q] (go path-clause q)))
          #{[:edge :a :b]
            [:edge :b :a]
            [:edge :a :c]
