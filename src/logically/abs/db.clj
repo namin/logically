@@ -7,19 +7,29 @@
 (pldb/db-rel fact p)
 
 (defn db-get-fact [db f]
-  (fresh [g h]
-         (copy-term f g)
-         (fn [a]
-           (bind* (assoc-meta a :db [@db]) (fact g)))
-         (copy-term g h)
-         (== f h)))
+  (fn [a]
+    (bind* (assoc-meta a :db [@db]) (fact f))))
 
 (defn db-add-fact! [db f]
-  (fresh [g]
-         (copy-term f g)
-         (fn [a]
-           (do (swap! db #(-> % (pldb/db-fact fact (walk* a g))))
-               a))))
+  (fn [a]
+    (do (swap! db #(-> % (pldb/db-fact fact (walk* a f))))
+        a)))
+
+(defn db-fresh-fact [db f]
+  (let [old-db @db
+        old-a  (atom nil)
+        restore (fn []
+                  (all
+                   (fn [a]
+                     (do
+                       (reset! db old-db)
+                       @old-a))))]
+    (all
+     (fn [a] (do (reset! old-a a) a))
+     (conda
+      [(db-get-fact db f) (restore) fail]
+      [succeed])
+     (restore))))
 
 (defn db-retract-fact! [db f]
   (all

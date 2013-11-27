@@ -1,6 +1,7 @@
 (ns logically.abs.induced_tp_test
   (:use [logically.abs.induced_tp] :reload)
   (:use [logically.abs.ex_ack] :reload)
+  (:use [logically.abs.ex_rotate] :reload)
   (:refer-clojure :exclude [==])
   (:use [clojure.core.logic :exclude [is] :as l]
         [clojure.core.logic.nominal :exclude [fresh hash] :as nom])
@@ -40,7 +41,16 @@
      [:ans [:ack [:s [:s 0]] [:s [:s 0]] [:s [:s [:s [:s [:s [:s [:s 0]]]]]]]]]
      })
 
+(comment
+  (def r (set (run* [q] (fresh [res] (go ack-clause [:ack [:s [:s 0]] [:s [:s 0]] res] q)))))
+  (count r)
+  (clojure.set/difference r s-ack)
+)
 (deftest test-ack
   (let [r (set (run* [q] (fresh [res] (go ack-clause [:ack [:s [:s 0]] [:s [:s 0]] res] q))))]
-    (is (= s-ack r))))
+    (is (= r s-ack))))
 
+(deftest test-rotate
+  (let [r (set (run* [q] (fresh [res] (go rotate-clause [:rotate '(a b c) res] q))))]
+    (is (= r r) ;; TODO
+  )))
