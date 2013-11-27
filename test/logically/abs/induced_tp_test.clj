@@ -52,5 +52,7 @@
 
 (deftest test-rotate
   (let [r (set (run* [q] (fresh [res] (go rotate-clause [:rotate '(a b c) res] q))))]
+    (is (contains? r '[:ans [:rotate (a b c) (a b c)]]))
     (is (= r r) ;; TODO
-  )))
+        )
+    ))
