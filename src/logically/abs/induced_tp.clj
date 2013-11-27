@@ -10,10 +10,9 @@
    [(fresh [b bs]
            (conso b bs goals)
            (conda
-            [(set-union db [:call b])]
-            [succeed])
-           (db-get-fact db [:ans b])
-           (prove db bs))]
+            [(all (set-union db [:call b]) fail)]
+            [(all (db-get-fact db [:ans b])
+                  (prove db bs))]))]
    [(== goals ())]))
 
 (defn operatoro [db c]
