@@ -6,7 +6,7 @@
         [clojure.core.logic.nominal :exclude [fresh hash] :as nom])
   (:use [clojure.test]))
 
-(def s
+(def s-ack
   '#{
      [:call [:ack [:s [:s 0]] [:s [:s 0]] _0]]
      [:call [:ack [:s [:s 0]] [:s 0] _0]]
@@ -42,4 +42,5 @@
 
 (deftest test-ack
   (let [r (set (run* [q] (fresh [res] (go ack-clause [:ack [:s [:s 0]] [:s [:s 0]] res] q))))]
-    (is (= s r))))
+    (is (= s-ack r))))
+

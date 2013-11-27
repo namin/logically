@@ -10,25 +10,23 @@
    [(fresh [b bs]
            (conso b bs goals)
            (conda
-            [(set-union db [:call b])
-             (db-get-fact db [:ans b])
-             (prove db bs)]
-            [(all
-              (db-get-fact db [:ans b])
-              (prove db bs))]))]
+            [(set-union db [:call b])]
+            [succeed])
+           (db-get-fact db [:ans b])
+           (prove db bs))]
    [(== goals ())]))
 
 (defn operatoro [db c]
-  (fresh [head body]
-         (db-get-fact db [:call head])
+  (fresh [head body head]
          (c head body)
+         (db-get-fact db [:call head])
          (prove db body)
          (set-union db [:ans head])))
 
 (defn iterateo [db c]
   (conda
-   [(operatoro db c) (db-retract-fact! db :flag) (iterateo db c)]
-   [(db-retract-fact! db :flag) (iterateo db c)]
+   [(all (operatoro db c) fail)]
+   [(all (db-retract-fact! db :flag)) (iterateo db c)]
    [succeed]))
 
 (defn go [c g q]

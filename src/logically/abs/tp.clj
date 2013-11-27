@@ -21,8 +21,8 @@
 
 (defn iterateo [db c]
   (conda
-   [(operatoro db c) (db-retract-fact! db :flag) (iterateo db c)]
-   [(db-retract-fact! db :flag) (iterateo db c)]
+   [(all (operatoro db c) fail)]
+   [(all (db-retract-fact! db :flag) (iterateo db c))]
    [succeed]))
 
 (defn go [c q]
