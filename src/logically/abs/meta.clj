@@ -6,8 +6,12 @@
 (defn solve* [u== clause goals]
   (conde
    [(== goals ())]
+   [(fresh [a b others]
+           (conso [:== a b] others goals)
+           (u== a b)
+           (solve* u== clause others))]
    [(fresh [head others body]
            (conso head others goals)
-           (clause u== head body)
+           (clause head body)
            (solve* u== clause body)
            (solve* u== clause others))]))

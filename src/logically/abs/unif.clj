@@ -6,6 +6,22 @@
 (defn u==-concrete [x y]
   (== x y))
 
+(defn u==-parity [x y]
+  (conde
+   [(fresh [s t]
+           (nonlvaro y)
+           (== y [:s t])
+           (u==-parity s t)
+           (conde
+            [(== s :even) (== x :odd)]
+            [(== s :odd) (== x :even)]))]
+   [(nonlvaro y) (== y 0) (== x :even)]
+   [(== x y)
+    (conde
+     [(nonlvaro y) (== y :even)]
+     [(nonlvaro y) (== y :odd)]
+     [(lvaro y)])]))
+
 (defn u==-parity1 [x y]
   (conde
    [(fresh [s t]
