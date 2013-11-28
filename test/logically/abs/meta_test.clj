@@ -1,5 +1,6 @@
 (ns logically.abs.meta_test
   (:use [logically.abs.meta] :reload)
+  (:use [logically.abs.unif] :reload)
   (:refer-clojure :exclude [==])
   (:use [clojure.core.logic :exclude [is] :as l]
         [clojure.core.logic.nominal :exclude [fresh hash] :as nom])
