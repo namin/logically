@@ -9,7 +9,7 @@
   (:use [clojure.test]))
 
 (def s-ack
-  '(
+  '#{
     [:call [:ack [:s [:s 0]] [:s [:s 0]] _0]]
     [:call [:ack [:s [:s 0]] [:s 0] _0]]
     [:call [:ack [:s [:s 0]] 0 _0]]
@@ -40,10 +40,11 @@
     [:ans [:ack 0 [:s [:s [:s [:s [:s [:s 0]]]]]] [:s [:s [:s [:s [:s [:s [:s 0]]]]]]]]]
     [:ans [:ack [:s 0] [:s [:s [:s [:s [:s 0]]]]] [:s [:s [:s [:s [:s [:s [:s 0]]]]]]]]]
     [:ans [:ack [:s [:s 0]] [:s [:s 0]] [:s [:s [:s [:s [:s [:s [:s 0]]]]]]]]]
-      ))
+    })
+  
 
 (def s-rotate
-  '(
+  '#{
     [:call [:rotate (a b c) _0]]
     [:call [:append _0 _1 (a b c)]]
     [:ans [:append () (a b c) (a b c)]]
@@ -77,12 +78,12 @@
     [:ans [:append (c) (a b) (c a b)]]
     [:ans [:rotate (a b c) (b c a)]]
     [:ans [:rotate (a b c) (c a b)]]
-      ))
+    })
 
 (deftest test-ack
-  (let [r (reverse (run* [q] (fresh [res] (go ack-clause [:ack [:s [:s 0]] [:s [:s 0]] res] q))))]
-    (is (= (set r) (set s-ack)))))
+  (let [r (set (run* [q] (fresh [res] (go ack-clause [:ack [:s [:s 0]] [:s [:s 0]] res] q))))]
+    (is (= r s-ack))))
 
 (deftest test-rotate
-  (let [r (reverse (run* [q] (fresh [res] (go rotate-clause [:rotate '(a b c) res] q))))]
-    (is (= (set r) (set s-rotate)))))
+  (let [r (set (run* [q] (fresh [res] (go rotate-clause [:rotate '(a b c) res] q))))]
+    (is (= r s-rotate))))
