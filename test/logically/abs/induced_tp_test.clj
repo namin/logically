@@ -2,7 +2,6 @@
   (:use [logically.abs.induced_tp] :reload)
   (:use [logically.abs.ex_ack] :reload)
   (:use [logically.abs.ex_rotate] :reload)
-  (:use [logically.abs.db] :reload)
   (:refer-clojure :exclude [==])
   (:use [clojure.core.logic :exclude [is] :as l]
         [clojure.core.logic.nominal :exclude [fresh hash] :as nom])

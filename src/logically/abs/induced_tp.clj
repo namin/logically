@@ -16,7 +16,7 @@
    [(== goals ())]))
 
 (defn operatoro [db flag c]
-  (fresh [head body head]
+  (fresh [head body]
          (c head body)
          (db-get-fact db [:call head])
          (prove db flag body)
