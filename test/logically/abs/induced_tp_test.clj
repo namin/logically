@@ -81,7 +81,7 @@
 
 (deftest test-ack
   (let [r (reverse (run* [q] (fresh [res] (go ack-clause [:ack [:s [:s 0]] [:s [:s 0]] res] q))))]
-    (is (= r s-ack))))
+    (is (= (set r) (set s-ack)))))
 
 (deftest test-rotate
   (let [r (reverse (run* [q] (fresh [res] (go rotate-clause [:rotate '(a b c) res] q))))]

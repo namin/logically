@@ -1,25 +1,24 @@
 (ns logically.abs.db
   (:refer-clojure :exclude [==])
   (:use [clojure.core.logic :exclude [is] :as l]
-        [clojure.core.logic.nominal :exclude [fresh hash] :as nom]))
+        [clojure.core.logic.nominal :exclude [fresh hash] :as nom]
+        [clojure.core.logic.pldb :as pldb]))
+
+(pldb/db-rel fact p)
 
 (defn db-get-fact [db f]
-  (fn [a] (bind* a (@db f))))
+  (fn [a]
+    (bind* (assoc-meta a :db [@db]) (fact f))))
 
 (defn db-add-fact! [db f]
-  (fn [a]
-    (let [fa (walk* a f)]
-      (do (swap! db (fn [dbf]
-                      (fn [x]
-                        (conde
-                         [(dbf x)]
-                         [(fresh [g]
-                                 (copy-term fa g)
-                                 (== g x))]))))
-          a))))
+  (fresh [g]
+         (copy-term f g)
+         (fn [a]
+           (do (swap! db #(-> % (pldb/db-fact fact (walk* a g))))
+               a))))
 
 (defn db-new []
-  (atom (fn [x] fail)))
+  (atom (pldb/db)))
 
 (defn flag-new []
   (atom false))
