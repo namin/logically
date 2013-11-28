@@ -5,32 +5,33 @@
   (:use [logically.abs.db] :reload)
   (:use [logically.abs.lub] :reload))
 
-(defn prove [db goals]
+(defn prove [db flag goals]
   (conde
    [(fresh [b bs]
            (conso b bs goals)
            (conda
-            [(all (set-union db [:call b]) fail)]
+            [(all (set-union db flag [:call b]) fail)]
             [(all (db-get-fact db [:ans b])
-                  (prove db bs))]))]
+                  (prove db flag bs))]))]
    [(== goals ())]))
 
-(defn operatoro [db c]
+(defn operatoro [db flag c]
   (fresh [head body head]
          (c head body)
          (db-get-fact db [:call head])
-         (prove db body)
-         (set-union db [:ans head])))
+         (prove db flag body)
+         (set-union db flag [:ans head])))
 
-(defn iterateo [db c]
+(defn iterateo [db flag c]
   (conda
-   [(all (operatoro db c) fail)]
-   [(all (db-retract-fact! db :flag)) (iterateo db c)]
+   [(all (operatoro db flag c) fail)]
+   [(all (flag-retract! flag) (iterateo db flag c))]
    [succeed]))
 
 (defn go [c g q]
-  (let [db (db-new)]
+  (let [db (db-new)
+        flag (flag-new)]
     (all
      (db-add-fact! db [:call g])
-     (iterateo db c)
+     (iterateo db flag c)
      (db-get-fact db q))))

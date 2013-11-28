@@ -2,10 +2,11 @@
   (:refer-clojure :exclude [==])
   (:use [clojure.core.logic :exclude [is] :as l]
         [clojure.core.logic.nominal :exclude [fresh hash] :as nom])
-  (:use [logically.abs.db]))
+  (:use [logically.abs.db] :reload))
 
-(defn set-union [db f]
+(defn set-union [db flag f]
   (all
-   (db-fresh-fact db f)
+   (conda [(db-get-fact db f) fail]
+          [succeed])
    (db-add-fact! db f)
-   (db-add-fact! db :flag)))
+   (flag-raise! flag)))
