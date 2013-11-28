@@ -28,3 +28,9 @@ Explorations of logic programming in Clojure's core.logic.
   * 2 Interpretation and Abstraction ([src](src/logically/abs/meta.clj)/[test](test/logically/abs/meta_test.clj))
   * 3 Concrete Semantics and Interpreters
     * 3.1 Observing the Success Set ([src](src/logically/abs/tp_gr.clj)/[test](test/logically/abs/tp_gr_test.clj))
+    * 3.2 Observing answers ([src](src/logically/abs/tp.clj)/[test](test/logically/abs/tp_test.clj))
+    * 3.3 Observing calls ([src](src/logically/abs/induced_tp.clj)/[test](test/logically/abs/induced_tp_test.clj))
+    * 3.4 Observing program points ([src](src/logically/abs/induced_tp_pp.clj)/[test](test/logically/abs/induced_tp_pp_test.clj))
+  * Meta-Circular Abstract Interpretation
+    * goal independent analysis ([src](src/logically/abs/tp_abs.clj)/[test](test/logically/abs/tp_abs_test.clj))
+
