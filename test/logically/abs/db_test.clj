@@ -16,10 +16,25 @@
                   (db-add-fact! db :hello)
                   (db-get-fact db q))))
          '(:hello)))
-  (is (= (set (run* [q]
+  (is (= (reverse (run* [q]
                     (let [db (db-new)]
                       (all
                        (db-add-fact! db :hello)
                        (db-add-fact! db :bye)
                        (db-get-fact db q)))))
-         '#{:hello :bye})))
+         '(:hello :bye)))
+  (is (= (reverse (run* [q]
+                    (let [db (db-new)]
+                      (all
+                       (conda [(all (db-add-fact! db :hello) fail)]
+                              [(db-add-fact! db :bye)])
+                       (db-get-fact db q)))))
+         '(:hello :bye)))
+  (is (= (reverse (run* [q]
+                    (let [db (db-new)]
+                      (all
+                       (conda [(db-get-fact db :hello) fail]
+                              [succeed])
+                       (db-add-fact! db :hello)
+                       (db-get-fact db q)))))
+         '(:hello))))

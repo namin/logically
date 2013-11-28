@@ -35,3 +35,13 @@
      (db-add-fact! db [:call g])
      (iterateo db flag c)
      (db-get-fact db q))))
+
+(defn go-db [c g]
+  (let [db (db-new)
+        flag (flag-new)]
+    (do
+      (run* [q]
+       (all
+        (db-add-fact! db [:call g])
+        (iterateo db flag c)))
+      @db)))
