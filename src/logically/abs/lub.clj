@@ -4,22 +4,25 @@
         [clojure.core.logic.nominal :exclude [fresh hash] :as nom])
   (:use [logically.abs.db] :reload))
 
-(defn numbervaro [n f g out-n]
+(defn markvaro [f g]
   (conda
-   [(all (== f ()) (== g ()) (== out-n n))]
-   [(fresh [hf tf hg tg]
+   [(all (== f ()) (== g ()))]
+   [(fresh [hf tf hg tg x]
            (conso hf tf f)
            (conso hg tg g)
-           (conda [(lvaro hf) (== [:var n] hg) (fresh [next-n] (project [n] (== next-n (inc n))) (numbervaro next-n tf tg out-n))]
-                  [(fresh [hn]
-                          (numbervaro n hf hg hn)
-                          (numbervaro hn tf tg out-n))]))]
-   [(all (== f g) (== out-n n))]))
+           (conda [(lvaro hf) (== [:var x] hg) (markvaro tf tg)]
+                  [(markvaro hf hg)
+                   (markvaro tf tg)]))]
+   [(all (== f g))]))
 
 (defn set-union [db flag f]
   (fresh [g out-n]
-   (numbervaro 0 f g out-n)
-   (conda [(db-get-fact db g) fail]
+   (markvaro f g)
+   (conda [(db-get-fact db g)
+           fail]
           [succeed])
    (db-add-fact! db f)
    (flag-raise! flag)))
+
+(defn lub [db flag f]
+  (set-union db flag f))

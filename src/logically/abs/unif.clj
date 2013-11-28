@@ -16,11 +16,13 @@
             [(== s :even) (== x :odd)]
             [(== s :odd) (== x :even)]))]
    [(nonlvaro y) (== y 0) (== x :even)]
-   [(== x y)
+   [(nonlvaro y)
     (conde
-     [(nonlvaro y) (== y :even)]
-     [(nonlvaro y) (== y :odd)]
-     [(lvaro y)])]))
+     [(== y :even)]
+     [(== y :odd)])
+    (== x y)]
+   [(lvaro y)
+    (== x y)]))
 
 (defn u==-parity1 [x y]
   (conde
@@ -34,10 +36,15 @@
             [(== s :even) (== x :odd)]
             [(== s :odd) (== x :even)]))]
    [(nonlvaro y) (== y 0) (== x :zero)]
-   [(== x y)
+   [(nonlvaro y)
     (conde
-     [(nonlvaro y) (== y :even)]
-     [(nonlvaro y) (== y :odd)]
-     [(nonlvaro y) (== y :zero)]
-     [(nonlvaro y) (== y :one)]
-     [(lvaro y)])]))
+     [(== y :even)]
+     [(== y :odd)]
+     [(== y :zero)]
+     [(== y :one)])
+    (== x y)]
+   [(lvaro y)
+    (== x y)]))
+
+(defn uok [u== x y]
+  (u== x y))
