@@ -78,7 +78,7 @@
   (letfn [(solve0 [goal tree]
             (solve [goal] tree))
           (solve [goals tree]
-            (conde
+            (conda
               [(== goals ())
                (== tree ())]
               [(fresh [g gs ts b tb]
