@@ -66,7 +66,8 @@
          (== head [:evalo fml truth model])
          (conde
           [(symo fml)
-           (asserto fml truth model)]
+           (asserto fml truth model)
+           (== body [])]
           [(fresh [fm]
                   (== [:not fm] fml)
                   (conde
