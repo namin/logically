@@ -37,7 +37,10 @@
              (conde
               [(evalo fm1 true model)
                (evalo fm2 true model)]
-              [(evalo fm1 false model)])]))]
+              [(evalo fm1 false model)])]
+            [(== false truth)
+             (evalo fm1 true model)
+             (evalo fm2 false model)]))]
    [(fresh [fm1 fm2]
            (== [:and fm1 fm2] fml)
            (conde
@@ -82,7 +85,10 @@
                     (conde
                      [(== body [[:evalo fm1 true model]
                                 [:evalo fm2 true model]])]
-                     [(== body [[:evalo fm1 false model]])])]))]
+                     [(== body [[:evalo fm1 false model]])])]
+                   [(== false truth)
+                    (== body [[:evalo fm1 true model]
+                              [:evalo fm2 false model]])]))]
           [(fresh [fm1 fm2]
                   (== [:and fm1 fm2] fml)
                   (conde
