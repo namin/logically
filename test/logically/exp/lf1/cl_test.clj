@@ -13,16 +13,16 @@
 (defn f0 [] (app (app (s) (app (s) (app (k) (app (s) (i))))) (i)))
 (defn f [] (app (f0) (f0)))
 
-(deftest test-lc
-  (is (lc-ok))
-  (is (= (run* [q] (fresh [a b c] (== q [c a b]) (lc-clauses c a b) (== a 'typ)))
+(deftest test-cl
+  (is (cl-ok))
+  (is (= (run* [q] (fresh [a b c] (== q [c a b]) (cl-clauses c a b) (== a 'typ)))
         '([(exp) typ []]
           [(contracto _0 _1) typ [[_0 (exp)] [_1 (exp)]]]
           [(wo1 _0 _1) typ [[_0 (exp)] [_1 (exp)]]]
           [(wo _0 _1) typ [[_0 (exp)] [_1 (exp)]]])))
-  (is (= (run 3 [q] (lc q (exp)))
+  (is (= (run 3 [q] (cl q (exp)))
          '((s) (k) (app (s) (s)))))
   (is (= (run 1 [q] (fresh [ev] (nom/fresh [alpha]
                                            (nom/hash alpha q)
-                                           (lc ev (wo (app q alpha) (app alpha alpha))))))
+                                           (cl ev (wo (app q alpha) (app alpha alpha))))))
          '((app (app (s) (app (s) (app (s) (k)))) (app (app (s) (k)) _0))))))

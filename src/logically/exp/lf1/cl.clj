@@ -4,7 +4,7 @@
         [clojure.core.logic.nominal :exclude [fresh hash] :as nom])
   (:use [logically.exp.lf1]))
 
-(defc lc
+(defc cl
   [exp [[] typ]]
   [s [[] (exp)]]
   [k [[] (exp)]]
