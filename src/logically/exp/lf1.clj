@@ -1,7 +1,6 @@
 (ns logically.exp.lf1
   (:refer-clojure :exclude [==])
-  (:use [clojure.core.logic :exclude [is] :as l]
-        [clojure.core.logic.nominal :exclude [fresh hash] :as nom]))
+  (:use [clojure.core.logic :exclude [is] :as l]))
 
 (defn solve-for* [clause]
   (letfn [(solve [goals]

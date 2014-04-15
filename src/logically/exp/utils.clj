@@ -1,7 +1,6 @@
 (ns logically.exp.utils
   (:refer-clojure :exclude [==])
-  (:use [clojure.core.logic :exclude [is] :as l]
-        [clojure.core.logic.nominal :exclude [fresh hash] :as nom]))
+  (:use [clojure.core.logic :exclude [is] :as l]))
 
 ;;; prettier reification for single-variable constraints
 (defn reifier-for [tag x]

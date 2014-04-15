@@ -1,7 +1,6 @@
 (ns logically.exp.prop
   (:refer-clojure :exclude [==])
-  (:use [clojure.core.logic :exclude [is] :as l]
-        [clojure.core.logic.nominal :exclude [fresh hash] :as nom])
+  (:use [clojure.core.logic :exclude [is] :as l])
   (:use [logically.art.interpreters.meta])
   (:use [logically.exp.utils]))
 
