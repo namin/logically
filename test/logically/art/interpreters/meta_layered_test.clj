@@ -172,12 +172,10 @@
     [:not
      [:evalo [:and p [:implies p q]] true [[p _0] [q _1]]]
      :<--
-     [:assume
-      [:evalo [:and p [:implies p q]] true [[p _0] [q _1]]]
-      false]]]
+     [:assume [:evalo [:and p [:implies p q]] true [[p _0] [q _1]]] false]]]
    false]
   :-
-  (!= (_1 true) (_0 true)))
+  (!= (_0 true) (_1 true)))
  ([_0
    _1
    [:not
@@ -192,15 +190,12 @@
       [:assume [:evalo p true [[p _0] [q _1]]] false]]]]
    false]
   :-
-  (!= (_1 _2) (_0 true))
-  (!= (_1 true) (_0 true)))
+  (!= (_0 true) (_1 true))
+  (!= (_0 true) (_1 _2)))
  ([true
    _0
    [:not
-    [:evalo
-     [:implies [:and p [:implies p q]] q]
-     false
-     [[p true] [q _0]]]
+    [:evalo [:implies [:and p [:implies p q]] q] false [[p true] [q _0]]]
     :<--
     [:not
      [:evalo [:and p [:implies p q]] true [[p true] [q _0]]]
@@ -216,10 +211,7 @@
  ([true
    _0
    [:not
-    [:evalo
-     [:implies [:and p [:implies p q]] q]
-     false
-     [[p true] [q _0]]]
+    [:evalo [:implies [:and p [:implies p q]] q] false [[p true] [q _0]]]
     :<--
     [:not
      [:evalo [:and p [:implies p q]] true [[p true] [q _0]]]
@@ -239,10 +231,7 @@
  ([true
    _0
    [:not
-    [:evalo
-     [:implies [:and p [:implies p q]] q]
-     false
-     [[p true] [q _0]]]
+    [:evalo [:implies [:and p [:implies p q]] q] false [[p true] [q _0]]]
     :<--
     [:not
      [:evalo [:and p [:implies p q]] true [[p true] [q _0]]]
@@ -261,10 +250,7 @@
  [true
   true
   [:not
-   [:evalo
-    [:implies [:and p [:implies p q]] q]
-    false
-    [[p true] [q true]]]
+   [:evalo [:implies [:and p [:implies p q]] q] false [[p true] [q true]]]
    :<--
    ([[:evalo [:and p [:implies p q]] true [[p true] [q true]]]
      :<--
@@ -281,10 +267,7 @@
  ([true
    _0
    [:not
-    [:evalo
-     [:implies [:and p [:implies p q]] q]
-     false
-     [[p true] [q _0]]]
+    [:evalo [:implies [:and p [:implies p q]] q] false [[p true] [q _0]]]
     :<--
     [:not
      [:evalo [:and p [:implies p q]] true [[p true] [q _0]]]
@@ -301,8 +284,7 @@
    false]
   :-
   (!= (_0 true))))
-
-         ))
+))
 )
 
 
