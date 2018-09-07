@@ -1,4 +1,4 @@
-(ns logically.exp.prop
+(ns logically.exp.smt
   (:refer-clojure :exclude [==])
   (:use [clojure.core.logic.protocols]
         [clojure.core.logic :exclude [is] :as l])
@@ -7,12 +7,12 @@
 
 (defn spit-lines [smt-lines]
   (with-open [wrt (io/writer "out.smt")]
-  (doseq [x smt-lines]
-    (.write wrt (str x "\n")))))
+    (doseq [x smt-lines]
+      (.write wrt (str x "\n")))))
 
 (defn call-cvc4 [smt-lines]
   (do
-    (spit-lines (cons '(set-logic ALL-SUPPORTED) smt-lines))
+    (spit-lines (cons '(set-logic ALL_SUPPORTED) smt-lines))
     (let [r (sh "cvc4" "-m" "--lang" "smt" "out.smt")]
       (:out r))))
 
@@ -68,7 +68,7 @@
         cm (:cm cs)
         rs (vals cm)
         xs (into [] (set (mapcat (fn [r] (-rands r)) rs)))
-        r (-reify* (with-meta empty-s (meta s)) xs)
+        r (-reify* (with-meta empty-s (meta a)) xs)
         s (reduce (fn [m x] (assoc m (walk r x) x)) {}  xs)
         rr (map (fn [x] (-reifyc x nil r a)) rs)
         xr (map (fn [x] (walk r x)) xs)
@@ -90,7 +90,7 @@
                 cm (:cm cs)
                 rs (vals cm)
                 xs (into [] (set (mapcat (fn [r] (-rands r)) rs)))
-                r (-reify* (with-meta empty-s (meta s)) xs)
+                r (-reify* (with-meta empty-s (meta a)) xs)
                 rr (map (fn [x] (-reifyc x nil r a)) rs)
                 xr (map (fn [x] (walk r x)) xs)
                 smt-lines (concat (map (fn [x] `(~'declare-const ~x ~'Int)) xr)
@@ -111,16 +111,3 @@
 
 (defn smtc [xs p]
   (cgoal (-smtc xs p)))
-
-(run* [q]
-  (smtc [q] `(~'= ~q 1))
-  (smtc [q] `(~'= ~q 2))
-  (smtc [q] `(~'= ~q 3)))
-
-(run* [q]
-  (smtc [q] `(~'= ~q 1))
-  smt-purge)
-
-(run 2 [q]
-  (smtc [q] `(~'> ~q 0))
-  smt-purge)
