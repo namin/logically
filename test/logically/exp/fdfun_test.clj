@@ -1,4 +1,4 @@
-(ns logically.exp.fdfun_tests
+(ns logically.exp.fdfun_test
   (:use [logically.exp.fdfun] :reload)
   (:refer-clojure :exclude [==])
   (:use [clojure.core.logic :exclude [is] :as l])
