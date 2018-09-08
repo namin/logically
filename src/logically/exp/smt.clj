@@ -79,7 +79,7 @@
     (when (check-sat smt-lines)
       (smt-purge-loop '() smt-lines s a--))))
 
-(defn -smtc [xs p]
+(defn -smtc [p]
   (reify
     IConstraintStep
     (-step [this s]
@@ -111,5 +111,5 @@
     IConstraintWatchedStores
     (-watched-stores [this] #{::l/subst ::smt})))
 
-(defn smtc [xs p]
-  (cgoal (-smtc xs p)))
+(defn smtc [p]
+  (cgoal (-smtc p)))
