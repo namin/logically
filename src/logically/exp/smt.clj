@@ -16,12 +16,20 @@
     (let [r (sh "cvc4" "-m" "--lang" "smt" "out.smt")]
       (:out r))))
 
+(defn call-z3 [smt-lines]
+  (do
+    (spit-lines smt-lines)
+    (let [r (sh "z3" "out.smt")]
+      (:out r))))
+
+(def call-smt call-z3)
+
 (defn read-sat [o]
   (let [i (.indexOf o "\n")]
     (= "sat" (.substring o 0 i))))
 
 (defn check-sat [smt-lines]
-  (read-sat (call-cvc4 (concat smt-lines '((check-sat) (exit))))))
+  (read-sat (call-smt (concat smt-lines '((check-sat) (exit))))))
 
 (defn read-model [o]
   (let [i (.indexOf o "\n")]
@@ -34,7 +42,7 @@
       false)))
 
 (defn get-model [smt-lines]
-  (read-model (call-cvc4 (concat smt-lines '((check-sat) (get-model) (exit))))))
+  (read-model (call-smt (concat smt-lines '((check-sat) (get-model) (exit))))))
 
 (defn neg-model [model]
   (cons 'assert (cons (cons 'or
@@ -63,14 +71,14 @@
        ((add-model m s) a--)
        (fn [] (smt-purge-loop (cons m ms) smt-lines s a--))))))
 
-(defn smt-constraints [a]
+(defn smt-constraints [a rs]
   (let [cs (:cs a)
         cm (:cm cs)
-        rs (vals cm)
+        rs (concat (vals cm) rs)
         rs (filter #((-watched-stores %) ::smt) rs)
-        xs (into [] (set (mapcat (fn [r] (-rands r)) rs)))
+        xs (into [] (set (filter (fn [x] (lvar? (walk a x))) (mapcat (fn [r] (-rands r)) rs))))
         r (-reify* (with-meta empty-s (meta a)) xs)
-        s (reduce (fn [m x] (assoc m (walk r x) x)) {}  xs)
+        s (reduce (fn [m x] (assoc m (walk r x) x)) {} xs)
         rr (map (fn [x] (-reifyc x nil r a)) rs)
         xr (map (fn [x] (walk r x)) xs)
         smt-lines (concat (map (fn [x] `(~'declare-const ~x ~'Int)) xr)
@@ -79,7 +87,7 @@
     [smt-lines s a--]))
 
 (defn smt-purge [a]
-  (let [[smt-lines s a--] (smt-constraints a)]
+  (let [[smt-lines s a--] (smt-constraints a [])]
     (when (check-sat smt-lines)
       (smt-purge-loop '() smt-lines s a--))))
 
@@ -90,19 +98,18 @@
       (reify
         clojure.lang.IFn
         (invoke [_ a]
-          (let [a ((addcg this) a)
-                [smt-lines _ _] (smt-constraints a)]
+          (let [[smt-lines _ _] (smt-constraints a [this])]
             (when (check-sat smt-lines)
-              a)))
+              ((addcg this) a))))
         IRunnable
         (-runnable? [_]
           true)))
     IConstraintOp
     (-rator [_] `-smtc)
-    (-rands [_] (filter clojure.core.logic/lvar? (flatten p)))
+    (-rands [_] (filter lvar? (flatten p)))
     IReifiableConstraint
     (-reifyc [c v r s]
-      (walk* r p))
+      (walk* r (walk* s p)))
     IConstraintWatchedStores
     (-watched-stores [this] #{::l/subst ::smt})))
 

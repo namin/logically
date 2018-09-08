@@ -40,3 +40,31 @@
             [(== 'hello q)])
            smt-purge))))
 
+(defn faco [n out]
+  (conde
+   [(smtc `(~'= ~n 0))
+    (smtc `(~'= ~out 1))]
+   [(smtc `(~'> ~n 0))
+    (fresh [n-1 r]
+      (smtc `(~'= (~'- ~n 1) ~n-1))
+      (smtc `(~'= (~'* ~n ~r) ~out))
+      (faco n-1 r))]))
+
+(deftest faco-7
+  (is (= '([0 1] [1 1] [2 2] [3 6] [4 24] [5 120] [6 720])
+       (run 7 [n out]
+         (faco n out)
+         smt-purge))))
+
+(deftest faco-backwards-2
+  (is (= '(2)
+         (run* [q]
+           (faco q 2)
+           smt-purge))))
+
+(deftest faco-backwards-6
+  (is (= '(6)
+         (run* [q]
+           (faco q 720)
+           smt-purge))))
+
