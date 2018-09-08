@@ -8,19 +8,22 @@
 (defn spit-lines [smt-lines]
   (with-open [wrt (io/writer "out.smt")]
     (doseq [x smt-lines]
-      (.write wrt (str x "\n")))))
+      (.write wrt (clojure.string/replace (str x "\n") #"bv-" "#b")))))
+
+(defn replace-back [s]
+  (clojure.string/replace s #"#b" "bv-"))
 
 (defn call-cvc4 [smt-lines]
   (do
     (spit-lines (cons '(set-logic ALL_SUPPORTED) smt-lines))
     (let [r (sh "cvc4" "-m" "--lang" "smt" "out.smt")]
-      (:out r))))
+      (replace-back (:out r)))))
 
 (defn call-z3 [smt-lines]
   (do
     (spit-lines smt-lines)
     (let [r (sh "z3" "out.smt")]
-      (:out r))))
+      (replace-back (:out r)))))
 
 (def call-smt call-z3)
 
@@ -49,10 +52,13 @@
   (read-model (call-smt (concat smt-lines '((check-sat) (get-model) (exit))))))
 
 (defn neg-model [model]
-  (cons 'assert (cons (cons 'or
-  (map (fn [xv]
-         `(~'not (~'= ~(first xv) ~(second xv))))
-       model)) nil)))
+  (let [cases
+        (map (fn [xv]
+               `(~'not (~'= ~(first xv) ~(second xv))))
+             model)]
+    (if (empty? cases)
+      '(assert false)
+      (cons 'assert (cons (cons 'or cases) nil)))))
 
 (defn get-next-model [xs ms]
   (let [ys (concat xs (map neg-model ms))]
@@ -79,14 +85,19 @@
   (let [cs (:cs a)
         cm (:cm cs)
         rs (concat (vals cm) rs)
+        ds (filter #((-watched-stores %) ::smt-decl) rs)
         rs (filter #((-watched-stores %) ::smt) rs)
-        xs (into [] (set (filter (fn [x] (lvar? (walk a x))) (mapcat (fn [r] (-rands r)) rs))))
+        dvs (set (filter (fn [x] (lvar? (walk a x))) (mapcat (fn [r] (-rands r)) ds)))
+        vs (set (filter (fn [x] (lvar? (walk a x))) (mapcat (fn [r] (-rands r)) rs)))
+        xs (into [] (clojure.set/union dvs vs))
         r (-reify* (with-meta empty-s (meta a)) xs)
         s (reduce (fn [m x] (assoc m (walk r x) x)) {} xs)
         rr (map (fn [x] (-reifyc x nil r a)) rs)
-        xr (map (fn [x] (walk r x)) xs)
-        smt-lines (concat (map (fn [x] `(~'declare-const ~x ~'Int)) xr)
-                          (map (fn [x] `(~'assert ~x)) rr))
+        xr (map (fn [x] (walk r x)) (clojure.set/difference vs dvs))
+        smt-lines (concat
+                   (map (fn [x] `(~'declare-const ~@(-reifyc x nil r a))) ds)
+                   (map (fn [x] `(~'declare-const ~x ~'Int)) xr)
+                   (map (fn [x] `(~'assert ~x)) rr))
         a-- (reduce (fn [a x] ((remcg x) a)) a rs)]
     [smt-lines s a--]))
 
@@ -119,3 +130,26 @@
 
 (defn smtc [p]
   (cgoal (-smtc p)))
+
+(defn -smt-decl [x t]
+  (reify
+    IConstraintStep
+    (-step [this s]
+      (reify
+        clojure.lang.IFn
+        (invoke [_ a]
+          ((addcg this) a))
+        IRunnable
+        (-runnable? [_]
+          false)))
+    IConstraintOp
+    (-rator [_] `-smtc)
+    (-rands [_] [x])
+    IReifiableConstraint
+    (-reifyc [c v r s]
+      `(~(walk* r (walk* s x)) ~t))
+    IConstraintWatchedStores
+    (-watched-stores [this] #{::l/subst ::smt-decl})))
+
+(defn smt-decl [x t]
+  (cgoal (-smt-decl x t)))

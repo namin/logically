@@ -81,3 +81,16 @@
              (smtc `(~'= (~'mod (~'* ~e ~d) ~phi) 1))
              (== k [n phi e d])
              smt-purge)))))
+
+(deftest bitvec-1
+  (is (= '((_0 :- (_0 (_ BitVec 3))))
+       (run* [q]
+         (smt-decl q '(_ BitVec 3))
+         smt-purge))))
+
+(deftest bitvec-2
+  (is (= '(bv-001 bv-111 bv-101 bv-011)
+       (run* [q]
+         (smt-decl q '(_ BitVec 3))
+         (smtc `(~'= ~q (~'bvor ~q ~'bv-001)))
+         smt-purge))))
