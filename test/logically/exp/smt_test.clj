@@ -31,3 +31,12 @@
             [(smtc [q] `(~'= ~q 2))])
            smt-purge))))
 
+(deftest mix-constraints
+  (is (= '(1)
+         (run* [q]
+           (predc q number? nil)
+           (conde
+            [(smtc [q] `(~'= ~q 1))]
+            [(== 'hello q)])
+           smt-purge))))
+

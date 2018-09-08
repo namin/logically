@@ -67,6 +67,7 @@
   (let [cs (:cs a)
         cm (:cm cs)
         rs (vals cm)
+        rs (filter #((-watched-stores %) ::smt) rs)
         xs (into [] (set (mapcat (fn [r] (-rands r)) rs)))
         r (-reify* (with-meta empty-s (meta a)) xs)
         s (reduce (fn [m x] (assoc m (walk r x) x)) {}  xs)
@@ -89,6 +90,7 @@
                 cs (:cs a)
                 cm (:cm cs)
                 rs (vals cm)
+                rs (filter #((-watched-stores %) ::smt) rs)
                 xs (into [] (set (mapcat (fn [r] (-rands r)) rs)))
                 r (-reify* (with-meta empty-s (meta a)) xs)
                 rr (map (fn [x] (-reifyc x nil r a)) rs)
@@ -107,7 +109,7 @@
     (-reifyc [c v r s]
       (walk* r p))
     IConstraintWatchedStores
-    (-watched-stores [this] #{::subst} #{::smt})))
+    (-watched-stores [this] #{::l/subst ::smt})))
 
 (defn smtc [xs p]
   (cgoal (-smtc xs p)))
