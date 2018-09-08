@@ -94,3 +94,20 @@
          (smt-decl q '(_ BitVec 3))
          (smtc `(~'= ~q (~'bvor ~q ~'bv-001)))
          smt-purge))))
+
+(deftest custom-datatypes-1
+  (is (= '([(node 21 (as nil (TreeList Int)))
+            (node false (as nil (TreeList Bool)))])
+       (run 1 [t1 t2]
+         (smt-any [t1 t2]
+                  '(declare-datatypes
+                    (T)
+                    ((Tree leaf (node (value T) (children TreeList)))
+                     (TreeList nil (cons (car Tree) (cdr TreeList))))))
+         (smt-decl t1 '(Tree Int))
+         (smt-decl t2 '(Tree Bool))
+         (smtc `(~'not (~'= ~t1 (~'as ~'leaf (~'Tree ~'Int)))))
+         (smtc `(~'> (~'value ~t1) 20))
+         (smtc `(~'not (~'is-leaf ~t2)))
+         (smtc `(~'not (~'value ~t2)))
+         smt-purge))))

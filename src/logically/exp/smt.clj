@@ -85,16 +85,20 @@
   (let [cs (:cs a)
         cm (:cm cs)
         rs (concat (vals cm) rs)
+        anys (filter #((-watched-stores %) ::smt-any) rs)
         ds (filter #((-watched-stores %) ::smt-decl) rs)
         rs (filter #((-watched-stores %) ::smt) rs)
+        avs (set (filter (fn [x] (lvar? (walk a x))) (mapcat (fn [r] (-rands r)) anys)))
         dvs (set (filter (fn [x] (lvar? (walk a x))) (mapcat (fn [r] (-rands r)) ds)))
         vs (set (filter (fn [x] (lvar? (walk a x))) (mapcat (fn [r] (-rands r)) rs)))
-        xs (into [] (clojure.set/union dvs vs))
+        xs (into [] (clojure.set/union avs dvs vs))
         r (-reify* (with-meta empty-s (meta a)) xs)
         s (reduce (fn [m x] (assoc m (walk r x) x)) {} xs)
         rr (map (fn [x] (-reifyc x nil r a)) rs)
-        xr (map (fn [x] (walk r x)) (clojure.set/difference vs dvs))
+        xr (map (fn [x] (walk r x)) (clojure.set/difference vs (clojure.set/union avs dvs)))
+        ranys (map (fn [x] (-reifyc x nil r a)) anys)
         smt-lines (concat
+                   ranys
                    (map (fn [x] `(~'declare-const ~@(-reifyc x nil r a))) ds)
                    (map (fn [x] `(~'declare-const ~x ~'Int)) xr)
                    (map (fn [x] `(~'assert ~x)) rr))
@@ -124,7 +128,7 @@
     (-rands [_] (filter lvar? (flatten p)))
     IReifiableConstraint
     (-reifyc [c v r s]
-      (walk* r (walk* s p)))
+      (apply list (walk* r (walk* s p))))
     IConstraintWatchedStores
     (-watched-stores [this] #{::l/subst ::smt})))
 
@@ -143,7 +147,7 @@
         (-runnable? [_]
           false)))
     IConstraintOp
-    (-rator [_] `-smtc)
+    (-rator [_] `-smt-decl)
     (-rands [_] [x])
     IReifiableConstraint
     (-reifyc [c v r s]
@@ -153,3 +157,26 @@
 
 (defn smt-decl [x t]
   (cgoal (-smt-decl x t)))
+
+(defn -smt-any [xs p]
+  (reify
+    IConstraintStep
+    (-step [this s]
+      (reify
+        clojure.lang.IFn
+        (invoke [_ a]
+          ((addcg this) a))
+        IRunnable
+        (-runnable? [_]
+          false)))
+    IConstraintOp
+    (-rator [_] `-smt-any)
+    (-rands [_] xs)
+    IReifiableConstraint
+    (-reifyc [c v r s]
+      (apply list (walk* r (walk* s p))))
+    IConstraintWatchedStores
+    (-watched-stores [this] #{::l/subst ::smt-any})))
+
+(defn smt-any [xs p]
+  (cgoal (-smt-any xs p)))
