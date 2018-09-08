@@ -23,3 +23,11 @@
            (smtc [q] `(~'> ~q 0))
            smt-purge))))
 
+(deftest sat-conde-1
+  (is (= '(1 2)
+         (run* [q]
+           (conde
+            [(smtc [q] `(~'= ~q 1))]
+            [(smtc [q] `(~'= ~q 2))])
+           smt-purge))))
+
