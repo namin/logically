@@ -68,3 +68,16 @@
            (faco q 720)
            smt-purge))))
 
+(deftest rsa-small-nums
+  (is (= '([143 120 7 103])
+         (run 1 [k]
+           (fresh [p q n phi e d]
+             (smtc `(~'= ~p 11))
+             (smtc `(~'= ~q 13))
+             (smtc `(~'= ~n (~'* ~p ~q)))
+             (smtc `(~'= ~phi (~'* (~'- ~p 1) (~'- ~q 1))))
+             (smtc `(~'= ~e 7))
+             (smtc `(~'<= 0 ~d))
+             (smtc `(~'= (~'mod (~'* ~e ~d) ~phi) 1))
+             (== k [n phi e d])
+             smt-purge)))))
