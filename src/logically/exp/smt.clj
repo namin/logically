@@ -25,8 +25,12 @@
 (def call-smt call-z3)
 
 (defn read-sat [o]
-  (let [i (.indexOf o "\n")]
-    (= "sat" (.substring o 0 i))))
+  (let [i (.indexOf o "\n")
+        m (.substring o 0 i)]
+    (cond
+      (= "sat" m) true
+      (= "unsat" m) false
+      :else (throw (AssertionError. (format "SMT solver answered '%s'" m))))))
 
 (defn check-sat [smt-lines]
   (read-sat (call-smt (concat smt-lines '((check-sat) (exit))))))
