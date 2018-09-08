@@ -104,7 +104,7 @@
           true)))
     IConstraintOp
     (-rator [_] `-smtc)
-    (-rands [_] xs)
+    (-rands [_] (filter clojure.core.logic/lvar? (flatten p)))
     IReifiableConstraint
     (-reifyc [c v r s]
       (walk* r p))
