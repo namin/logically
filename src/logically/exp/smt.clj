@@ -63,7 +63,7 @@
        ((add-model m s) a--)
        (fn [] (smt-purge-loop (cons m ms) smt-lines s a--))))))
 
-(defn smt-purge [a]
+(defn smt-constraints [a]
   (let [cs (:cs a)
         cm (:cm cs)
         rs (vals cm)
@@ -76,6 +76,10 @@
         smt-lines (concat (map (fn [x] `(~'declare-const ~x ~'Int)) xr)
                           (map (fn [x] `(~'assert ~x)) rr))
         a-- (reduce (fn [a x] ((remcg x) a)) a rs)]
+    [smt-lines s a--]))
+
+(defn smt-purge [a]
+  (let [[smt-lines s a--] (smt-constraints a)]
     (when (check-sat smt-lines)
       (smt-purge-loop '() smt-lines s a--))))
 
@@ -87,16 +91,7 @@
         clojure.lang.IFn
         (invoke [_ a]
           (let [a ((addcg this) a)
-                cs (:cs a)
-                cm (:cm cs)
-                rs (vals cm)
-                rs (filter #((-watched-stores %) ::smt) rs)
-                xs (into [] (set (mapcat (fn [r] (-rands r)) rs)))
-                r (-reify* (with-meta empty-s (meta a)) xs)
-                rr (map (fn [x] (-reifyc x nil r a)) rs)
-                xr (map (fn [x] (walk r x)) xs)
-                smt-lines (concat (map (fn [x] `(~'declare-const ~x ~'Int)) xr)
-                                  (map (fn [x] `(~'assert ~x)) rr))]
+                [smt-lines _ _] (smt-constraints a)]
             (when (check-sat smt-lines)
               a)))
         IRunnable
