@@ -18,17 +18,19 @@
 (defn replace-back [s]
   (clojure.string/replace s #"#b" "bv-"))
 
-(defn call-cvc4 [smt-lines]
-  (let [out-fn (out-smt)]
-    (spit-lines (cons '(set-logic ALL_SUPPORTED) smt-lines) out-fn)
-    (let [r (sh "cvc4" "-m" "--lang" "smt" out-fn)]
-      (replace-back (:out r)))))
-
-(defn call-z3 [smt-lines]
+(defn call-gen [smt-lines f]
   (let [out-fn (out-smt)]
     (spit-lines smt-lines out-fn)
-    (let [r (sh "z3" out-fn)]
+    (let [r (f out-fn)]
       (replace-back (:out r)))))
+
+(defn call-cvc4 [smt-lines]
+  (call-gen (cons '(set-logic ALL_SUPPORTED) smt-lines)
+            (fn [fn] (sh "cvc4" "-m" "--lang" "smt" fn))))
+
+(defn call-z3 [smt-lines]
+  (call-gen smt-lines
+            (fn [fn] (sh "z3" fn))))
 
 (def call-smt call-z3)
 
