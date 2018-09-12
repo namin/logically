@@ -5,8 +5,13 @@
   (:require [clojure.java.io :as io])
   (:use [clojure.java.shell :only [sh]]))
 
-(defn spit-lines [smt-lines]
-  (with-open [wrt (io/writer "out.smt")]
+(def out-counter (atom 0))
+
+(defn out-smt []
+  (str "out" (swap! out-counter inc) ".smt"))
+
+(defn spit-lines [smt-lines out-fn]
+  (with-open [wrt (io/writer out-fn)]
     (doseq [x smt-lines]
       (.write wrt (clojure.string/replace (str x "\n") #"bv-" "#b")))))
 
@@ -14,15 +19,15 @@
   (clojure.string/replace s #"#b" "bv-"))
 
 (defn call-cvc4 [smt-lines]
-  (do
-    (spit-lines (cons '(set-logic ALL_SUPPORTED) smt-lines))
-    (let [r (sh "cvc4" "-m" "--lang" "smt" "out.smt")]
+  (let [out-fn (out-smt)]
+    (spit-lines (cons '(set-logic ALL_SUPPORTED) smt-lines) out-fn)
+    (let [r (sh "cvc4" "-m" "--lang" "smt" out-fn)]
       (replace-back (:out r)))))
 
 (defn call-z3 [smt-lines]
-  (do
-    (spit-lines smt-lines)
-    (let [r (sh "z3" "out.smt")]
+  (let [out-fn (out-smt)]
+    (spit-lines smt-lines out-fn)
+    (let [r (sh "z3" out-fn)]
       (replace-back (:out r)))))
 
 (def call-smt call-z3)
