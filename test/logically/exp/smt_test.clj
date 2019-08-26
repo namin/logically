@@ -69,7 +69,7 @@
            smt-purge))))
 
 (deftest rsa-small-nums
-  (is (= '([143 120 7 103])
+  (is (= '([143 120 7 703])
          (run 1 [k]
            (fresh [p q n phi e d]
              (smtc `(~'= ~p 11))
