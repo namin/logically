@@ -52,7 +52,7 @@
         (let [e (read-string s)]
           (map
            (fn [x] [(second x) (second (rest (rest (rest x))))])
-           (rest e))))
+           e)))
       false)))
 
 (defn get-model [smt-lines]

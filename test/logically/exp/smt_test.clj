@@ -84,7 +84,7 @@
              smt-purge)))))
 
 (deftest bitvec-1
-  (is (= '((_0 :- (_0 (_ BitVec 3))))
+  (is (= '(bv-000 bv-111 bv-110 bv-100 bv-101 bv-010 bv-011 bv-001)
        (run* [q]
          (smt-decl q '(_ BitVec 3))
          smt-purge))))
